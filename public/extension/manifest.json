@@ -16,7 +16,8 @@
     "https://www.walmart.ca/*",
     "https://www.amazon.com/*",
     "https://www.amazon.ca/*",
-    "https://www.target.com/*"
+    "https://www.target.com/*",
+    "https://*/*"
   ],
   "action": {
     "default_title": "MGA Quality Sentinel",
@@ -44,5 +45,17 @@
   },
   "background": {
     "service_worker": "background.js"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "index.html",
+        "assets/*",
+        "content.js",
+        "deep_review.js",
+        "classification_v2.js"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

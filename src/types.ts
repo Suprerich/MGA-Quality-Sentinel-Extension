@@ -47,7 +47,11 @@ export type NavSection =
   | 'settings';
 
 export interface Complaint {
+  id?: string;
   index?: number;
+  productId?: string;
+  productName?: string;
+  retailer?: string;
   userTag: string;
   reviewTime: string;
   reviewRating?: number | null;
@@ -56,6 +60,8 @@ export interface Complaint {
   keywords: string[];
   comment: string;
   platform?: PlatformCode;
+  sourceUrl?: string;
+  countryOfOrigin?: string;
 }
 
 export interface ProductItem {

@@ -1,9 +1,22 @@
 import JSZip from 'jszip';
 
 export async function generateExtensionZip(): Promise<Blob> {
+  // 1. Try to fetch the pre-bundled complete zip from the server (has compiled index.html, assets, logo, content scripts)
+  try {
+    const response = await fetch('/mga-sentinel-extension.zip');
+    if (response.ok) {
+      const blob = await response.blob();
+      if (blob.size > 50000) {
+        return blob;
+      }
+    }
+  } catch (err) {
+    console.warn('Pre-bundled zip fetch failed, generating dynamically:', err);
+  }
+
+  // 2. Dynamic fallback packaging
   const zip = new JSZip();
 
-  // 1. manifest.json
   const manifest = {
     manifest_version: 3,
     name: 'MGA Quality Sentinel - Quality Monitoring Dashboard',
@@ -22,7 +35,8 @@ export async function generateExtensionZip(): Promise<Blob> {
       'https://www.walmart.ca/*',
       'https://www.amazon.com/*',
       'https://www.amazon.ca/*',
-      'https://www.target.com/*'
+      'https://www.target.com/*',
+      'https://*/*'
     ],
     action: {
       default_title: 'MGA Quality Sentinel',
@@ -50,97 +64,87 @@ export async function generateExtensionZip(): Promise<Blob> {
     },
     background: {
       service_worker: 'background.js'
-    }
+    },
+    web_accessible_resources: [
+      {
+        resources: [
+          'index.html',
+          'assets/*',
+          'content.js',
+          'deep_review.js',
+          'classification_v2.js'
+        ],
+        matches: ['<all_urls>']
+      }
+    ]
   };
 
   zip.file('manifest.json', JSON.stringify(manifest, null, 2));
 
-  // 2. background.js
-  const backgroundJs = `/* MGA Quality Sentinel - background.js (v1.4.3)
-   Supports Side Panel, action popup, and opening Full Dashboard tab */
+  const backgroundJs = `/* MGA Quality Sentinel - background.js (v1.4.3) */
 chrome.runtime.onInstalled.addListener(() => {
   try {
-    chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: false }).catch(() => {});
+    if (chrome.sidePanel?.setPanelBehavior) {
+      chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: false }).catch(() => {});
+    }
   } catch (e) {}
 });
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg?.type === 'QC_OPEN_DASHBOARD') {
-    chrome.tabs.create({ url: chrome.runtime.getURL('dashboard.html') });
-    sendResponse({ ok: true });
+    const url = chrome.runtime.getURL('index.html');
+    chrome.tabs.create({ url });
+    sendResponse({ ok: true, url });
   }
   return true;
 });
 `;
   zip.file('background.js', backgroundJs);
 
-  // 3. fetch existing scripts from public/extension or bundle them
-  // Let's bundle the scripts cleanly
+  // Fetch index.html
   try {
-    const fileNames = [
-      'content.js',
-      'deep_review.js',
-      'classification_v2.js',
-      'sku_core.js',
-      'summary.js',
-      'sku_validation.js',
-      'trend_tracking.js',
-      'popup.js',
-      'sidepanel.js',
-      'style.css',
-      'sidepanel.css',
-      'popup.html',
-      'sidepanel.html'
-    ];
-
-    for (const fileName of fileNames) {
-      try {
-        const resp = await fetch(`/extension/${fileName}`);
-        if (resp.ok) {
-          const text = await resp.text();
-          zip.file(fileName, text);
-        }
-      } catch (err) {
-        console.warn('Could not fetch /extension/' + fileName, err);
-      }
+    const resp = await fetch('/index.html');
+    if (resp.ok) {
+      zip.file('index.html', await resp.text());
     }
-  } catch (e) {
-    // fallback
+  } catch (e) {}
+
+  // Fetch extension scripts
+  const fileNames = [
+    'content.js',
+    'deep_review.js',
+    'classification_v2.js',
+    'sku_core.js',
+    'summary.js',
+    'sku_validation.js',
+    'trend_tracking.js',
+    'popup.js',
+    'sidepanel.js',
+    'style.css',
+    'sidepanel.css',
+    'popup.html',
+    'sidepanel.html'
+  ];
+
+  for (const fileName of fileNames) {
+    try {
+      const resp = await fetch(`/extension/${fileName}`);
+      if (resp.ok) {
+        zip.file(fileName, await resp.text());
+      }
+    } catch (e) {}
   }
 
-  // 4. README_INSTALL.txt
   const readme = `========================================================================
 MGA Quality Sentinel - Chrome & Microsoft Edge Installation Guide
 ========================================================================
 
-COMPATIBILITY:
-- Google Chrome (Version 114+)
-- Microsoft Edge (Version 114+)
-Manifest V3 architecture. No cloud database, no server, 100% Local-First.
-
-QUICK INSTALLATION (Takes 30 seconds):
-------------------------------------------------------------------------
-1. Extract this entire zip archive to a local folder on your computer.
-   (e.g., C:\\MGA_Quality_Sentinel or ~/Documents/MGA_Quality_Sentinel)
-
-2. Open your Chromium browser:
-   - For Google Chrome: Navigate to  chrome://extensions
-   - For Microsoft Edge: Navigate to edge://extensions
-
-3. Turn ON "Developer mode" toggle (usually at top right).
-
-4. Click the "Load unpacked" button (top left).
-
-5. Select the extracted folder containing "manifest.json".
-
-6. Done! The MGA Quality Sentinel icon will appear in your browser toolbar.
-   Click the puzzle icon to Pin it to your toolbar.
-
-HOW TO USE:
-------------------------------------------------------------------------
-- Open any Walmart (US/CA), Amazon (US/CA), or Target search or product page.
-- Click the MGA Sentinel icon in your toolbar.
-- You can use the Quick Side Panel or open the Full Modern Dashboard!
+QUICK INSTALLATION:
+1. Extract this entire zip file to a permanent folder on your computer.
+2. Open Chrome (chrome://extensions) or Edge (edge://extensions).
+3. Enable "Developer mode" in the top right.
+4. Click "Load unpacked" and select the extracted folder.
+5. Click the extension icon or "Open Full Quality Dashboard" to launch!
 `;
   zip.file('README_INSTALL.txt', readme);
 

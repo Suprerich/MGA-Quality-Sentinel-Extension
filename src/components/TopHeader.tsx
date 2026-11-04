@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Language } from '../types';
 import { getTranslation } from '../services/i18n';
+import { isExtensionRuntime } from '../services/realSearchScanService';
 
 interface TopHeaderProps {
   lastScanTime: string;
@@ -71,6 +72,21 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
               </h1>
               <span className="text-xs text-[#8E8E93] hidden lg:inline">
                 · {t.appSubtitle}
+              </span>
+              <span
+                className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                  isExtensionRuntime()
+                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                    : 'bg-[#007AFF]/10 text-[#007AFF] border border-[#007AFF]/20'
+                }`}
+                title={
+                  isExtensionRuntime()
+                    ? 'Connected directly to Chromium Extension Runtime (tabs, storage, scripting active)'
+                    : 'Running in Web Engine Mode. Download extension for direct tab injection.'
+                }
+              >
+                <span className={`h-1.5 w-1.5 rounded-full ${isExtensionRuntime() ? 'bg-emerald-500 animate-pulse' : 'bg-[#007AFF]'}`} />
+                {isExtensionRuntime() ? 'Extension Mode' : 'Web Live Mode'}
               </span>
             </div>
 

@@ -147,7 +147,7 @@ export const ExtensionInstallModal: React.FC<ExtensionInstallModalProps> = ({
                   5
                 </span>
                 <div>
-                  <b>Done!</b> Pin MGA Quality Sentinel to your browser bar. You can now scan Walmart US/CA, Amazon US/CA, and Target with full multi-channel synthesis!
+                  <b>Done!</b> Pin MGA Quality Sentinel to your browser toolbar. Click the extension icon and select <b>&ldquo;📊 Open Full Quality Dashboard ↗&rdquo;</b> (or navigate to <code className="font-mono bg-neutral-100 dark:bg-neutral-800 px-1 py-0.5 rounded text-[11px]">chrome-extension://&lt;id&gt;/index.html</code>) to open this full-screen dashboard with native browser automation!
                 </div>
               </li>
             </ol>

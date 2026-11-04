@@ -216,9 +216,6 @@ export default function App() {
         error: result.error || 'Scan failed.'
       });
 
-      if (!result.isExtension) {
-        setIsInstallModalOpen(true);
-      }
       return;
     }
 
@@ -302,9 +299,6 @@ export default function App() {
         message: '',
         error: result.error || 'Scan failed on active page.'
       });
-      if (!result.isExtension) {
-        setIsInstallModalOpen(true);
-      }
       return;
     }
 

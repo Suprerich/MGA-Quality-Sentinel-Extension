@@ -16,6 +16,20 @@ async function startServer() {
       timestamp: (/* @__PURE__ */ new Date()).toISOString()
     });
   });
+  app.get(["/api/download-extension", "/mga-sentinel-extension.zip"], (_req, res) => {
+    const candidates = [
+      path.join(__dirname, "dist", "mga-sentinel-extension.zip"),
+      path.join(__dirname, "public", "mga-sentinel-extension.zip")
+    ];
+    for (const p of candidates) {
+      if (fs.existsSync(p)) {
+        res.setHeader("Content-Type", "application/zip");
+        res.setHeader("Content-Disposition", 'attachment; filename="MGA_Quality_Sentinel_Extension_v1.4.3.zip"');
+        return res.sendFile(p);
+      }
+    }
+    res.status(404).json({ error: "Extension zip package not found. Run npm run build first." });
+  });
   if (hasDist) {
     app.use(express.static(distPath));
     app.use(express.static(path.join(__dirname, "public")));

@@ -21,6 +21,22 @@ async function startServer() {
     });
   });
 
+  // Direct Extension Zip Download Route
+  app.get(['/api/download-extension', '/mga-sentinel-extension.zip'], (_req, res) => {
+    const candidates = [
+      path.join(__dirname, 'dist', 'mga-sentinel-extension.zip'),
+      path.join(__dirname, 'public', 'mga-sentinel-extension.zip'),
+    ];
+    for (const p of candidates) {
+      if (fs.existsSync(p)) {
+        res.setHeader('Content-Type', 'application/zip');
+        res.setHeader('Content-Disposition', 'attachment; filename="MGA_Quality_Sentinel_Extension_v1.4.3.zip"');
+        return res.sendFile(p);
+      }
+    }
+    res.status(404).json({ error: 'Extension zip package not found. Run npm run build first.' });
+  });
+
   if (hasDist) {
     // Production mode: Serve built static bundle
     app.use(express.static(distPath));
