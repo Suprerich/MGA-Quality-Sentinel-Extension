@@ -37,6 +37,13 @@ export function buildRetailerSearchUrl(platform: string, keyword: string): strin
     case 'target':
     case 'Target':
       return `https://www.target.com/s?searchTerm=${q}`;
+    case 'costco_us':
+    case 'Costco US':
+      return `https://www.costco.com/CatalogSearch?dept=All&keyword=${q}`;
+    case 'costco_ca':
+    case 'Costco CA':
+    case 'Costco Canada':
+      return `https://www.costco.ca/CatalogSearch?dept=All&keyword=${q}`;
     default:
       return `https://www.walmart.ca/en/search?q=${q}`;
   }
@@ -165,6 +172,8 @@ function generateWebSimulation(
   const kw = (keyword || 'MGA Entertainment').trim();
 
   const retailerName =
+    platform.includes('costco_us') || platform === 'Costco US' ? 'Costco US' :
+    platform.includes('costco_ca') || platform === 'Costco CA' || platform === 'Costco Canada' ? 'Costco Canada' :
     platform.includes('walmart_ca') ? 'Walmart Canada' :
     platform.includes('walmart_us') ? 'Walmart US' :
     platform.includes('amazon_ca') ? 'Amazon Canada' :
@@ -260,6 +269,7 @@ function generateWebSimulation(
       walmartNumber: retailerName.includes('Walmart') ? itemNum : '',
       amazonNumber: retailerName.includes('Amazon') ? asin : '',
       targetNumber: retailerName.includes('Target') ? tcin : '',
+      costcoNumber: retailerName.includes('Costco') ? String(1580000 + idx * 421) : '',
       upcNumber: `035051${upcSuffix}`,
       modelNumber: `MGA-${kw.slice(0, 3).toUpperCase()}-${100 + idx}`,
       countryOfOrigin: item.origin,
@@ -466,6 +476,7 @@ export async function executeRealSearchScan(
       walmartNumber: p.walmartNumber || '',
       amazonNumber: p.amazonNumber || '',
       targetNumber: p.targetNumber || '',
+      costcoNumber: p.costcoNumber || '',
       upcNumber: p.upcNumber || '',
       modelNumber: p.modelNumber || '',
       countryOfOrigin: p.countryOfOrigin || 'UNKNOWN',
@@ -636,7 +647,7 @@ export async function executeRealActiveTabScan(threshold = 4.0): Promise<RealSea
     }
 
     const url = activeTab.url || '';
-    const isSupported = /https:\/\/www\.(walmart\.(com|ca)|amazon\.(com|ca)|target\.com)\//.test(url);
+    const isSupported = /https:\/\/www\.(walmart\.(com|ca)|amazon\.(com|ca)|target\.com|costco\.(com|ca))\//.test(url);
     if (!isSupported) {
       return {
         success: false,
@@ -645,7 +656,7 @@ export async function executeRealActiveTabScan(threshold = 4.0): Promise<RealSea
         complaints: [],
         deepResults: [],
         keywordSummary: [],
-        error: 'Current page is not a supported retailer. Please navigate to Walmart US, Walmart Canada, Amazon US, Amazon Canada, or Target.'
+        error: 'Current page is not a supported retailer. Please navigate to Walmart US, Walmart Canada, Amazon US, Amazon Canada, Target, Costco US, or Costco Canada.'
       };
     }
 
@@ -680,6 +691,7 @@ export async function executeRealActiveTabScan(threshold = 4.0): Promise<RealSea
         walmartNumber: meta.walmartNumber || '',
         amazonNumber: meta.amazonNumber || '',
         targetNumber: meta.targetNumber || '',
+        costcoNumber: meta.costcoNumber || '',
         upcNumber: meta.upcNumber || '',
         modelNumber: meta.modelNumber || '',
         countryOfOrigin: meta.countryOfOrigin || 'UNKNOWN',
@@ -708,6 +720,7 @@ export async function executeRealActiveTabScan(threshold = 4.0): Promise<RealSea
       walmartNumber: p.walmartNumber || '',
       amazonNumber: p.amazonNumber || '',
       targetNumber: p.targetNumber || '',
+      costcoNumber: p.costcoNumber || '',
       upcNumber: p.upcNumber || '',
       modelNumber: p.modelNumber || '',
       countryOfOrigin: p.countryOfOrigin || 'UNKNOWN',

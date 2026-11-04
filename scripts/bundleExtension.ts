@@ -20,7 +20,7 @@ async function buildExtensionZip() {
     manifest_version: 3,
     name: 'MGA Quality Sentinel - Quality Monitoring Dashboard',
     version: '1.4.3',
-    description: 'Enterprise quality monitoring extension for QA/QAE teams tracking ratings, consumer complaints, and defect risks across Walmart, Amazon, and Target.',
+    description: 'Enterprise quality monitoring extension for QA/QAE teams tracking ratings, consumer complaints, and defect risks across Walmart, Amazon, Target, and Costco (US & Canada).',
     permissions: [
       'activeTab',
       'tabs',
@@ -35,6 +35,8 @@ async function buildExtensionZip() {
       'https://www.amazon.com/*',
       'https://www.amazon.ca/*',
       'https://www.target.com/*',
+      'https://www.costco.com/*',
+      'https://www.costco.ca/*',
       'https://*/*'
     ],
     action: {
@@ -48,7 +50,9 @@ async function buildExtensionZip() {
           'https://www.walmart.ca/*',
           'https://www.amazon.com/*',
           'https://www.amazon.ca/*',
-          'https://www.target.com/*'
+          'https://www.target.com/*',
+          'https://www.costco.com/*',
+          'https://www.costco.ca/*'
         ],
         js: [
           'content.js',

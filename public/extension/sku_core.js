@@ -39,26 +39,27 @@
     String(text||'').split(/\r?\n/).forEach(function(line){
       var t=line.trim(); if(!t || t[0]==='#') return;
       var p=t.split('|').map(function(x){ return x.trim(); });
-      var it={ name:p[0]||'', upc:normId(p[1]), model:normId(p[2]), wm:normId(p[3]), tcin:normId(p[4]), asin:normId(p[5]) };
-      if(it.name || it.upc || it.model || it.wm || it.tcin || it.asin){ it.tokens=tokens(it.name); items.push(it); }
+      var it={ name:p[0]||'', upc:normId(p[1]), model:normId(p[2]), wm:normId(p[3]), tcin:normId(p[4]), asin:normId(p[5]), costco:normId(p[6]) };
+      if(it.name || it.upc || it.model || it.wm || it.tcin || it.asin || it.costco){ it.tokens=tokens(it.name); items.push(it); }
     });
     return items;
   }
   function watchlistToText(items){
     return (items||[]).map(function(i){
-      return [i.name||'', i.upc||'', i.model||'', i.wm||'', i.tcin||'', i.asin||''].join(' | ').replace(/(\s*\|\s*)+$/,'');
+      return [i.name||'', i.upc||'', i.model||'', i.wm||'', i.tcin||'', i.asin||'', i.costco||''].join(' | ').replace(/(\s*\|\s*)+$/,'');
     }).join('\n');
   }
 
   function recIdentity(rec){
     rec=rec||{};
     return {
-      upc:   normId(rec.upcNumber || rec.upc),
-      model: normId(rec.modelNumber || rec.model),
-      wm:    normId(rec.walmartNumber || rec.wm),
-      tcin:  normId(rec.targetNumber || rec.tcin),
-      asin:  normId(rec.amazonNumber || rec.asin),
-      name:  rec.name || rec.productName || '',
+      upc:    normId(rec.upcNumber || rec.upc),
+      model:  normId(rec.modelNumber || rec.model),
+      wm:     normId(rec.walmartNumber || rec.wm),
+      tcin:   normId(rec.targetNumber || rec.tcin),
+      asin:   normId(rec.amazonNumber || rec.asin),
+      costco: normId(rec.costcoNumber || rec.costco),
+      name:   rec.name || rec.productName || '',
       tokens: tokens(rec.name || rec.productName || '')
     };
   }
@@ -69,9 +70,10 @@
     for(var i=0;i<wl.length;i++){ var w=wl[i]; if(id.upc && w.upc && id.upc===w.upc) return {item:w,score:1,by:'UPC'}; }
     for(var i2=0;i2<wl.length;i2++){ var w2=wl[i2]; if(id.model && w2.model && id.model===w2.model) return {item:w2,score:1,by:'Model'}; }
     for(var i3=0;i3<wl.length;i3++){ var w3=wl[i3];
-      if(id.wm && w3.wm && id.wm===w3.wm)     return {item:w3,score:1,by:'WM#'};
+      if(id.wm && w3.wm && id.wm===w3.wm)         return {item:w3,score:1,by:'WM#'};
       if(id.tcin && w3.tcin && id.tcin===w3.tcin) return {item:w3,score:1,by:'TCIN'};
       if(id.asin && w3.asin && id.asin===w3.asin) return {item:w3,score:1,by:'ASIN'};
+      if(id.costco && w3.costco && id.costco===w3.costco) return {item:w3,score:1,by:'Costco#'};
     }
     var best=null,bs=0;
     for(var i4=0;i4<wl.length;i4++){ var w4=wl[i4];
@@ -86,11 +88,12 @@
 
   function sameProduct(a,b){
     var ia=recIdentity(a), ib=recIdentity(b);
-    if(ia.upc && ib.upc)   return ia.upc===ib.upc;
-    if(ia.model && ib.model) return ia.model===ib.model;
-    if(ia.tcin && ib.tcin) return ia.tcin===ib.tcin;
-    if(ia.wm && ib.wm)     return ia.wm===ib.wm;
-    if(ia.asin && ib.asin) return ia.asin===ib.asin;
+    if(ia.upc && ib.upc)       return ia.upc===ib.upc;
+    if(ia.model && ib.model)   return ia.model===ib.model;
+    if(ia.tcin && ib.tcin)     return ia.tcin===ib.tcin;
+    if(ia.wm && ib.wm)         return ia.wm===ib.wm;
+    if(ia.asin && ib.asin)     return ia.asin===ib.asin;
+    if(ia.costco && ib.costco) return ia.costco===ib.costco;
     if(seriesConflict(ia.tokens, ib.tokens)) return false;
     return overlap(ia.tokens, ib.tokens) >= 0.6;
   }
@@ -103,7 +106,7 @@
   }
   function saveWatchlist(items){
     _cache=(items||[]).map(function(i){ i.tokens=tokens(i.name); return i; });
-    var plain=_cache.map(function(i){ return {name:i.name,upc:i.upc,model:i.model,wm:i.wm,tcin:i.tcin,asin:i.asin}; });
+    var plain=_cache.map(function(i){ return {name:i.name,upc:i.upc,model:i.model,wm:i.wm,tcin:i.tcin,asin:i.asin,costco:i.costco}; });
     try{ var obj={}; obj[STORE_KEY]=plain; chrome.storage.local.set(obj, function(){}); }catch(e){}
   }
 

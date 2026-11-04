@@ -171,7 +171,7 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
       <KpiOverview
         watchlistCount={watchlistCount}
         lowRatingCount={lowRatingCount}
-        platformsCount={5}
+        platformsCount={PLAT_ORDER.length}
         alertCount={alertGroups.length}
         threshold={threshold}
         language={language}
@@ -226,11 +226,11 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
               <thead>
                 <tr className="border-b border-[#E5E5EA] dark:border-[#2C2C2E] text-[11px] font-semibold text-[#8E8E93] uppercase">
                   <th className="py-2.5 px-3">Product</th>
-                  <th className="py-2.5 px-2 text-center">WM US</th>
-                  <th className="py-2.5 px-2 text-center">WM CA</th>
-                  <th className="py-2.5 px-2 text-center">AMZ US</th>
-                  <th className="py-2.5 px-2 text-center">AMZ CA</th>
-                  <th className="py-2.5 px-2 text-center">Target</th>
+                  {PLAT_ORDER.map((plat) => (
+                    <th key={plat} className="py-2.5 px-2 text-center whitespace-nowrap">
+                      {PLAT_LABEL[plat]}
+                    </th>
+                  ))}
                   <th className="py-2.5 px-3 text-right">{t.colStatus}</th>
                 </tr>
               </thead>

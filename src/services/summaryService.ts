@@ -1,14 +1,16 @@
 import { CrossPlatformGroup, PlatformCode, ProductItem, Complaint, WatchlistItem } from '../types';
 import { matchToWatchlist, sameProduct } from './skuCore';
 
-export const PLAT_ORDER: PlatformCode[] = ['WMUS', 'WMCA', 'AMZUS', 'AMZCA', 'TARGET'];
+export const PLAT_ORDER: PlatformCode[] = ['WMUS', 'WMCA', 'AMZUS', 'AMZCA', 'TARGET', 'COSTCOUS', 'COSTCOCA'];
 
 export const PLAT_LABEL: Record<PlatformCode, string> = {
   WMUS: 'Walmart US',
   WMCA: 'Walmart CA',
   AMZUS: 'Amazon US',
   AMZCA: 'Amazon CA',
-  TARGET: 'Target'
+  TARGET: 'Target',
+  COSTCOUS: 'Costco US',
+  COSTCOCA: 'Costco CA'
 };
 
 export function platFromRetailer(r?: string): PlatformCode | null {
@@ -18,6 +20,8 @@ export function platFromRetailer(r?: string): PlatformCode | null {
   if (str.includes('amazon') && (str.includes('canada') || str.includes('.ca'))) return 'AMZCA';
   if (str.includes('amazon')) return 'AMZUS';
   if (str.includes('target')) return 'TARGET';
+  if (str.includes('costco') && (str.includes('canada') || str.includes('.ca') || str.includes(' ca'))) return 'COSTCOCA';
+  if (str.includes('costco')) return 'COSTCOUS';
   return null;
 }
 
@@ -28,6 +32,8 @@ export function platFromUrl(u?: string): PlatformCode | null {
   if (str.includes('amazon.ca')) return 'AMZCA';
   if (str.includes('amazon.com')) return 'AMZUS';
   if (str.includes('target.com')) return 'TARGET';
+  if (str.includes('costco.ca')) return 'COSTCOCA';
+  if (str.includes('costco.com')) return 'COSTCOUS';
   return null;
 }
 
@@ -73,7 +79,8 @@ export function groupProducts(
           modelNumber: p.modelNumber,
           walmartNumber: p.walmartNumber,
           targetNumber: p.targetNumber,
-          amazonNumber: p.amazonNumber
+          amazonNumber: p.amazonNumber,
+          costcoNumber: p.costcoNumber
         },
         _wl: null
       };

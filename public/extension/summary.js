@@ -14,18 +14,21 @@
   function getDeepData(){ try{ return deepData; }catch(e){ try{ return window.deepData; }catch(e2){ return null; } } }
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c];}); }
 
-  var PLAT_ORDER=['WMUS','WMCA','AMZUS','AMZCA','TARGET'];
-  var PLAT_LABEL={WMUS:'Walmart US',WMCA:'Walmart CA',AMZUS:'Amazon US',AMZCA:'Amazon CA',TARGET:'Target'};
+  var PLAT_ORDER=['WMUS','WMCA','AMZUS','AMZCA','TARGET','COSTCOUS','COSTCOCA'];
+  var PLAT_LABEL={WMUS:'Walmart US',WMCA:'Walmart CA',AMZUS:'Amazon US',AMZCA:'Amazon CA',TARGET:'Target',COSTCOUS:'Costco US',COSTCOCA:'Costco Canada'};
   function platFromRetailer(r){ r=String(r||'').toLowerCase();
     if(r.indexOf('walmart')>-1&&(r.indexOf('canada')>-1||r.indexOf('.ca')>-1))return'WMCA';
     if(r.indexOf('walmart')>-1)return'WMUS';
     if(r.indexOf('amazon')>-1&&(r.indexOf('canada')>-1||r.indexOf('.ca')>-1))return'AMZCA';
     if(r.indexOf('amazon')>-1)return'AMZUS';
-    if(r.indexOf('target')>-1)return'TARGET'; return null; }
+    if(r.indexOf('target')>-1)return'TARGET';
+    if(r.indexOf('costco')>-1&&(r.indexOf('canada')>-1||r.indexOf('.ca')>-1))return'COSTCOCA';
+    if(r.indexOf('costco')>-1)return'COSTCOUS'; return null; }
   function platFromUrl(u){ u=String(u||'').toLowerCase();
     if(u.indexOf('walmart.ca')>-1)return'WMCA'; if(u.indexOf('walmart.com')>-1)return'WMUS';
     if(u.indexOf('amazon.ca')>-1)return'AMZCA'; if(u.indexOf('amazon.com')>-1)return'AMZUS';
-    if(u.indexOf('target.com')>-1)return'TARGET'; return null; }
+    if(u.indexOf('target.com')>-1)return'TARGET';
+    if(u.indexOf('costco.ca')>-1)return'COSTCOCA'; if(u.indexOf('costco.com')>-1)return'COSTCOUS'; return null; }
 
   var groups=[];
 
@@ -49,7 +52,7 @@
     var SKU=window.QCSKU;
     var g=findGroup(rec);
     if(!g){
-      g={ name:rec.name||'', upc:rec.upc||'', model:rec.model||'', platforms:{}, complaints:[], _seen:{}, _probe:{name:rec.name,upcNumber:rec.upc,modelNumber:rec.model,walmartNumber:rec.wm,targetNumber:rec.tcin,amazonNumber:rec.asin}, _wl:null };
+      g={ name:rec.name||'', upc:rec.upc||'', model:rec.model||'', platforms:{}, complaints:[], _seen:{}, _probe:{name:rec.name,upcNumber:rec.upc,modelNumber:rec.model,walmartNumber:rec.wm,targetNumber:rec.tcin,amazonNumber:rec.asin,costcoNumber:rec.costco}, _wl:null };
       if(SKU){ var wl=SKU.getWatchlist(); if(wl&&wl.length){ var m=SKU.matchToWatchlist(rec,wl); if(m){ g._wl=m.item.name; g.name=m.item.name; } } }
       groups.push(g);
     }
@@ -76,7 +79,7 @@
           rating:(typeof p.rating==='number'?p.rating:null),
           count:(p.reviewCount!=null?p.reviewCount:null),
           url:p.url, name:p.name||'', upc:p.upcNumber||'', model:p.modelNumber||'',
-          wm:p.walmartNumber||'', tcin:p.targetNumber||'', asin:p.amazonNumber||'', complaints:[] }); });
+          wm:p.walmartNumber||'', tcin:p.targetNumber||'', asin:p.amazonNumber||'', costco:p.costcoNumber||'', complaints:[] }); });
       } else if(lp.mode==='detail' && lp.meta){
         var m=lp.meta;
         addRecord({
@@ -84,7 +87,7 @@
           rating:(typeof m.rating==='number'?m.rating:null),
           count:(m.reviewCount!=null?m.reviewCount:null),
           url:m.sourceUrl, name:m.productName||'', upc:m.upcNumber||'', model:m.modelNumber||'',
-          wm:m.walmartNumber||'', tcin:m.targetNumber||'', asin:m.amazonNumber||'',
+          wm:m.walmartNumber||'', tcin:m.targetNumber||'', asin:m.amazonNumber||'', costco:m.costcoNumber||'',
           complaints:(lp.complaints||[]).map(function(c){ return {issue:c.issueType,sentiment:c.sentiment,reviewRating:c.reviewRating,comment:c.comment}; }) });
       }
     }

@@ -233,11 +233,11 @@ export const CrossPlatformView: React.FC<CrossPlatformViewProps> = ({
                     <ArrowUpDown className="h-3 w-3" />
                   </div>
                 </th>
-                <th className="py-3 px-3 text-center min-w-[95px]">Walmart US</th>
-                <th className="py-3 px-3 text-center min-w-[95px]">Walmart CA</th>
-                <th className="py-3 px-3 text-center min-w-[95px]">Amazon US</th>
-                <th className="py-3 px-3 text-center min-w-[95px]">Amazon CA</th>
-                <th className="py-3 px-3 text-center min-w-[95px]">Target</th>
+                {PLAT_ORDER.map((plat) => (
+                  <th key={plat} className="py-3 px-3 text-center min-w-[95px]">
+                    {PLAT_LABEL[plat]}
+                  </th>
+                ))}
                 <th
                   onClick={() => toggleSort('avgRating')}
                   className="py-3 px-3 text-center min-w-[105px] cursor-pointer hover:text-[#1D1D1F]"
@@ -263,7 +263,7 @@ export const CrossPlatformView: React.FC<CrossPlatformViewProps> = ({
             <tbody className="divide-y divide-[#E5E5EA] dark:divide-[#2C2C2E]">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="py-12 text-center text-[#8E8E93]">
+                  <td colSpan={PLAT_ORDER.length + 5} className="py-12 text-center text-[#8E8E93]">
                     No products match current filter.
                   </td>
                 </tr>

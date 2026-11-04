@@ -15,6 +15,8 @@ function getRetailer(){
   if(h.includes('amazon.ca'))return'Amazon Canada';
   if(h.includes('amazon.com'))return'Amazon US';
   if(h.includes('target.com'))return'Target';
+  if(h.includes('costco.ca'))return'Costco Canada';
+  if(h.includes('costco.com'))return'Costco US';
   return h;
 }
 function getRetailerKey(){
@@ -22,7 +24,13 @@ function getRetailerKey(){
   if(h.includes('walmart'))return'walmart';
   if(h.includes('amazon'))return'amazon';
   if(h.includes('target'))return'target';
+  if(h.includes('costco'))return'costco';
   return'other';
+}
+function parseCostcoNumber(text,url){
+  const all=cleanText(text+' '+(url||''));
+  const ps=[/(?:Costco\s*#|Costco\s*Item\s*#|Item\s*#|Item\s*No\.?|Item\s*Number)\s*[:#]?\s*(\d{5,12})/i,/\.product\.(\d{5,12})/i,/\/p\/[^\/]*?(\d{5,12})/i];
+  for(const p of ps){const m=all.match(p);if(m)return m[1]}return'';
 }
 function productName(){
   const sels=['#productTitle','h1','[data-test=product-title]','[data-testid*=product-title]','[data-automation-id*=product-title]'];
@@ -143,22 +151,26 @@ function getKeywords(text){const t=lower(text);const pool=['broken','missing','q
 const REVIEW_SELECTORS={
   amazon:['[data-hook="review"]','#cm_cr-review_list [data-hook="review"]','div[id^="customer_review-"]'],
   walmart:['[itemprop="review"]','[data-testid*="review-card"]','[data-automation-id*="review-card"]','[data-automation-id*="customer-review"]','li.review-list-item'],
-  target:['[data-test="review"]','[data-test*="review-card"]','article[data-test*="review"]']
+  target:['[data-test="review"]','[data-test*="review-card"]','article[data-test*="review"]'],
+  costco:['.bazaarvoice-review','.bv-content-item','.bv-review-response','[data-bv-v*="review"]','.review-item']
 };
 const REVIEW_BODY_SELECTORS={
   amazon:['[data-hook="review-body"] span:not([class])','[data-hook="review-body"] span','[data-hook="review-body"]'],
   walmart:['[itemprop="reviewBody"]','[data-testid*="review-text"]','[data-automation-id*="review-text"]','.review-body','.review-text'],
-  target:['[data-test="review-card--review"]','[data-test*="reviewText"]','[data-test*="review-content"]']
+  target:['[data-test="review-card--review"]','[data-test*="reviewText"]','[data-test*="review-content"]'],
+  costco:['.bv-content-summary-body-text','.bv-content-body','.review-text','[itemprop="reviewBody"]']
 };
 const RATING_NODE_SELECTORS={
   amazon:['[data-hook="rating-out-of-text"]','#acrPopover','i.a-icon-star span.a-icon-alt','[data-hook="average-star-rating"] .a-icon-alt'],
   walmart:['[itemprop="ratingValue"]','[data-testid*="reviews-rating-value"]','[data-automation-id*="rating-value"]','span.rating-number','[aria-label*="out of 5 stars" i]'],
-  target:['[data-test="ratings"] [aria-label*="out of 5" i]','[data-test*="ratingValue"]','[aria-label*="out of 5 stars" i]']
+  target:['[data-test="ratings"] [aria-label*="out of 5" i]','[data-test*="ratingValue"]','[aria-label*="out of 5 stars" i]'],
+  costco:['[itemprop="ratingValue"]','.bv-rating-ratio-number','.bv-rating-value','[aria-label*="out of 5" i]']
 };
 const REVIEW_COUNT_NODE_SELECTORS={
   amazon:['#acrCustomerReviewText','[data-hook="total-review-count"]'],
   walmart:['[itemprop="reviewCount"]','[data-testid*="reviews-count"]','[data-automation-id*="review-count"]','a[href*="reviews"]'],
-  target:['[data-test*="review-count"]','[data-test="ratings"] a']
+  target:['[data-test*="review-count"]','[data-test="ratings"] a'],
+  costco:['[itemprop="reviewCount"]','.bv-rating-ratio-count','.bv-content-summary-item-count','a[href*="#reviews"]']
 };
 
 /* ===== SECTION 5: Review Block Scanning (v1.0.2 with __NEXT_DATA__) ===== */
@@ -310,6 +322,9 @@ function extractComment(block){
   }else if(key==='target'){
     const body=el.querySelector('[data-test="review-card--review"]')||el.querySelector('[data-test*="reviewText"]')||el.querySelector('[data-test*="review-content"]');
     if(body)raw=body.innerText||body.textContent;
+  }else if(key==='costco'){
+    const body=el.querySelector('.bv-content-summary-body-text')||el.querySelector('.bv-content-body')||el.querySelector('.review-text')||el.querySelector('[itemprop="reviewBody"]');
+    if(body)raw=body.innerText||body.textContent;
   }
   if(!raw)raw=block.text;
   let t=raw;
@@ -387,6 +402,7 @@ function getProductLinks(){
   if(h.includes('walmart')){sels=['a[href*="/ip/"]'];scopeSels=['[data-testid="item-stack"]','[data-testid*="results"]','[data-testid*="search-results"]'];}
   else if(h.includes('amazon')){sels=['a[href*="/dp/"]','a[href*="/gp/product/"]'];scopeSels=['[data-component-type="s-search-results"]','.s-main-slot'];}
   else if(h.includes('target')){sels=['a[href*="/p/"]'];scopeSels=['[data-test="product-grid"]','[data-test*="results"]','[data-test*="search-result"]'];}
+  else if(h.includes('costco')){sels=['a[href*=".product."]', 'a[href*="/p/"]'];scopeSels=['.product-list', '#search-results', '.product-results', '[data-testid*="product"]'];}
   let scope=null;
   for(const sc of scopeSels){const el=document.querySelector(sc);if(el){scope=el;break}}
   scope=scope||document;
@@ -394,7 +410,7 @@ function getProductLinks(){
   const seen=new Set(),out=[];
   for(const a of raw){
     const href=a.getAttribute('href')||'';
-    const m=href.match(/\/A-(\d+)/)||href.match(/\/ip\/[^/]+\/(\d+)/)||href.match(/\/(?:dp|gp\/product)\/([A-Z0-9]{10})/)||href.match(/\/p\/[^?]+/);
+    const m=href.match(/\/A-(\d+)/)||href.match(/\/ip\/[^/]+\/(\d+)/)||href.match(/\/(?:dp|gp\/product)\/([A-Z0-9]{10})/)||href.match(/\.product\.(\d+)/)||href.match(/\/p\/[^?]+/);
     const id=(m&&(m[1]||m[0]))||href.split('?')[0];
     if(!id||seen.has(id))continue;
     seen.add(id);out.push(a);
@@ -406,6 +422,7 @@ function isProductDetailPage(){
   if(h.includes('walmart')&&(p.includes('/ip/')||p.includes('/reviews/')))return true;
   if(h.includes('amazon')&&(p.includes('/dp/')||p.includes('/gp/product/')||p.includes('/product-reviews/')))return true;
   if(h.includes('target')&&p.includes('/p/'))return true;
+  if(h.includes('costco')&&(p.includes('.product.')||p.includes('/p/')))return true;
   return false;
 }
 function keywordSummary(complaints){
@@ -423,7 +440,7 @@ function extractFromContainer(container,url,threshold,analyzeVisibleText,originK
   if(rating===null)rating=parseRating(allText);if(reviewCount===null)reviewCount=parseReviewCount(allText);
   let alertStatus='NEED MANUAL CHECK';if(typeof rating==='number'&&!isNaN(rating)){alertStatus=rating<threshold?'ALERT':'OK'}/* v1.2.1: strict < to match WMCA "below 4.0" */
   const issueSummary=summarizeIssues(collectCandidateText(container,analyzeVisibleText));
-  return{retailer:getRetailer(),walmartNumber:parseWalmartNumber(allText,url),amazonNumber:parseAmazonNumber(allText,url),targetNumber:parseTargetNumber(allText,url),upcNumber:parseUPC(allText),modelNumber:parseModelNumber(allText),rating,reviewCount,countryOfOrigin:detectCountryOfOrigin(allText,originKeyword),alertStatus,url,...issueSummary};
+  return{retailer:getRetailer(),walmartNumber:parseWalmartNumber(allText,url),amazonNumber:parseAmazonNumber(allText,url),targetNumber:parseTargetNumber(allText,url),costcoNumber:parseCostcoNumber(allText,url),upcNumber:parseUPC(allText),modelNumber:parseModelNumber(allText),rating,reviewCount,countryOfOrigin:detectCountryOfOrigin(allText,originKeyword),alertStatus,url,...issueSummary};
 }
 function scanSearchPage(threshold,analyzeVisibleText,originKeyword){
   const checkedAt=new Date().toISOString(),sourceSite=location.hostname,map=new Map(),links=getProductLinks();
@@ -450,7 +467,7 @@ function scanDetailPage(threshold,analyzeVisibleText,originKeyword){
     if(reviewCount===null&&jsonSum.count!=null)reviewCount=jsonSum.count;
   }
   let alertStatus='NEED MANUAL CHECK';if(typeof rating==='number'&&!isNaN(rating)){alertStatus=rating<threshold?'ALERT':'OK'}/* v1.2.1: strict < to match WMCA "below 4.0" */
-  const meta={retailer:getRetailer(),productName:productName(),walmartNumber:parseWalmartNumber(bodyText,url),amazonNumber:parseAmazonNumber(bodyText,url),targetNumber:parseTargetNumber(bodyText,url),upcNumber:parseUPC(bodyText),modelNumber:parseModelNumber(bodyText),countryOfOrigin:detectCountryOfOrigin(bodyText,originKeyword),rating,reviewCount,ratingSource,ratingCheck,alertStatus,sourceUrl:url,checkedAt:new Date().toISOString()};
+  const meta={retailer:getRetailer(),productName:productName(),walmartNumber:parseWalmartNumber(bodyText,url),amazonNumber:parseAmazonNumber(bodyText,url),targetNumber:parseTargetNumber(bodyText,url),costcoNumber:parseCostcoNumber(bodyText,url),upcNumber:parseUPC(bodyText),modelNumber:parseModelNumber(bodyText),countryOfOrigin:detectCountryOfOrigin(bodyText,originKeyword),rating,reviewCount,ratingSource,ratingCheck,alertStatus,sourceUrl:url,checkedAt:new Date().toISOString()};
   const blocks=getReviewBlocks();
   const complaints=blocks.map((b,idx)=>{const comment=extractComment(b);return{userTag:detectUser(b,idx),reviewTime:detectTime(b),sentiment:getSentiment(comment),issueType:classifyIssue(comment)||'Other',keywords:getKeywords(comment),comment}}).filter(c=>c.comment&&c.comment.length>=15);
   return{mode:'detail',meta,complaints,keywordSummary:keywordSummary(complaints),products:[]};

@@ -3,9 +3,23 @@
  * Cross-platform retail monitoring & complaint analysis
  */
 
-export type RetailerId = 'walmart_us' | 'walmart_ca' | 'amazon_us' | 'amazon_ca' | 'target';
+export type RetailerId =
+  | 'walmart_us'
+  | 'walmart_ca'
+  | 'amazon_us'
+  | 'amazon_ca'
+  | 'target'
+  | 'costco_us'
+  | 'costco_ca';
 
-export type PlatformCode = 'WMUS' | 'WMCA' | 'AMZUS' | 'AMZCA' | 'TARGET';
+export type PlatformCode =
+  | 'WMUS'
+  | 'WMCA'
+  | 'AMZUS'
+  | 'AMZCA'
+  | 'TARGET'
+  | 'COSTCOUS'
+  | 'COSTCOCA';
 
 export type AlertStatus = 'ALERT' | 'OK' | 'NEED MANUAL CHECK';
 
@@ -76,6 +90,7 @@ export interface ProductItem {
   walmartNumber?: string;
   amazonNumber?: string;
   targetNumber?: string;
+  costcoNumber?: string;
   upcNumber?: string;
   modelNumber?: string;
   countryOfOrigin?: string;
@@ -101,6 +116,7 @@ export interface WatchlistItem {
   wm: string;
   tcin: string;
   asin: string;
+  costco?: string;
   status?: SkuValidationStatus;
   matchSource?: string;
   tokens?: Set<string>;
@@ -128,6 +144,7 @@ export interface CrossPlatformGroup {
     walmartNumber?: string;
     targetNumber?: string;
     amazonNumber?: string;
+    costcoNumber?: string;
   };
 }
 

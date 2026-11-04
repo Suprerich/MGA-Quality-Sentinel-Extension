@@ -82,6 +82,8 @@ export const ScannerHub: React.FC<ScannerHubProps> = ({
                 <option value="amazon_us">Amazon US (amazon.com)</option>
                 <option value="amazon_ca">Amazon Canada (amazon.ca)</option>
                 <option value="target">Target (target.com)</option>
+                <option value="costco_us">Costco US (costco.com)</option>
+                <option value="costco_ca">Costco Canada (costco.ca)</option>
               </select>
             </div>
 

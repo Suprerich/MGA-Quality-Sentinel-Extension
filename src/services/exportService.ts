@@ -87,6 +87,7 @@ export function exportProductsCsv(products: ProductItem[]): void {
     'walmartNumber',
     'amazonNumber',
     'targetNumber',
+    'costcoNumber',
     'upcNumber',
     'modelNumber',
     'alertStatus',

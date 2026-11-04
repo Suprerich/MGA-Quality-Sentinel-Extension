@@ -137,7 +137,7 @@ export const CrossPlatformMatrix: React.FC<CrossPlatformMatrixProps> = ({
           <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800/60">
             {filteredGroups.length === 0 ? (
               <tr>
-                <td colSpan={9} className="py-12 text-center text-neutral-500 dark:text-neutral-400">
+                <td colSpan={11} className="py-12 text-center text-neutral-500 dark:text-neutral-400">
                   No monitored products matched your filter criteria.
                 </td>
               </tr>

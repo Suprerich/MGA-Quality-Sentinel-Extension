@@ -34,7 +34,7 @@ export const WatchlistManager: React.FC<WatchlistManagerProps> = ({
   const [statusMessage, setStatusMessage] = useState('');
   const [directInput, setDirectInput] = useState('');
   const [directSite, setDirectSite] = useState<
-    'target' | 'walmart_us' | 'walmart_ca' | 'amazon_us' | 'amazon_ca'
+    'target' | 'walmart_us' | 'walmart_ca' | 'amazon_us' | 'amazon_ca' | 'costco_us' | 'costco_ca'
   >('target');
 
   // Sync text when watchlist changes externally
@@ -77,6 +77,14 @@ export const WatchlistManager: React.FC<WatchlistManagerProps> = ({
       url = /^[A-Z0-9]{10}$/i.test(id)
         ? `https://www.amazon.ca/product-reviews/${id}`
         : `https://www.amazon.ca/s?k=${encodeURIComponent(raw)}`;
+    } else if (directSite === 'costco_us') {
+      url = /^\d{5,}$/.test(id)
+        ? `https://www.costco.com/.product.${id}.html`
+        : `https://www.costco.com/CatalogSearch?dept=All&keyword=${encodeURIComponent(raw)}`;
+    } else if (directSite === 'costco_ca') {
+      url = /^\d{5,}$/.test(id)
+        ? `https://www.costco.ca/.product.${id}.html`
+        : `https://www.costco.ca/CatalogSearch?dept=All&keyword=${encodeURIComponent(raw)}`;
     }
 
     if (url) {
@@ -199,6 +207,8 @@ export const WatchlistManager: React.FC<WatchlistManagerProps> = ({
                 <option value="walmart_ca">Walmart CA (Item#)</option>
                 <option value="amazon_us">Amazon US (ASIN)</option>
                 <option value="amazon_ca">Amazon CA (ASIN)</option>
+                <option value="costco_us">Costco US (Item#)</option>
+                <option value="costco_ca">Costco CA (Item#)</option>
               </select>
               <button
                 onClick={handleOpenDirect}

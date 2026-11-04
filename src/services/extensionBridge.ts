@@ -18,6 +18,10 @@ export function buildSearchUrl(retailer: string, keyword: string): string {
       return `https://www.amazon.ca/s?k=${q}`;
     case 'target':
       return `https://www.target.com/s?searchTerm=${q}`;
+    case 'costco_us':
+      return `https://www.costco.com/CatalogSearch?dept=All&keyword=${q}`;
+    case 'costco_ca':
+      return `https://www.costco.ca/CatalogSearch?dept=All&keyword=${q}`;
     default:
       return `https://www.walmart.com/search?q=${q}`;
   }
@@ -400,6 +404,52 @@ export const SAMPLE_PRODUCTS: ProductItem[] = [
           'Knee joint was cracked in the box and completely refused to bend without snapping.'
       }
     ]
+  },
+  {
+    id: 'p-13',
+    retailer: 'Costco US',
+    platform: 'COSTCOUS',
+    name: "MGA's Miniverse Make It Mini Multi-Pack Bundle 6-Pack",
+    url: 'https://www.costco.com/mga-miniverse-make-it-mini-multipack.product.1689402.html',
+    rating: 3.3,
+    reviewCount: 428,
+    costcoNumber: '1689402',
+    upcNumber: '035051594238',
+    modelNumber: '594238',
+    countryOfOrigin: 'China',
+    alertStatus: 'ALERT',
+    mainIssue: 'Function issue',
+    issueBreakdownText: 'Function issue(14), Safety(9), Packaging(5)',
+    checkedAt: new Date(Date.now() - 3600000 * 3).toISOString(),
+    complaints: [
+      {
+        userTag: 'CostcoMember82',
+        reviewTime: 'Oct 30, 2026',
+        reviewRating: 2,
+        sentiment: 'NEGATIVE',
+        issueType: 'Function issue',
+        keywords: ['resin uncured', 'sticky', 'odor'],
+        comment: 'Costco bulk pack was great value but 3 out of 6 capsules had resin that would not cure under the UV lamp. Disappointed.'
+      }
+    ]
+  },
+  {
+    id: 'p-14',
+    retailer: 'Costco Canada',
+    platform: 'COSTCOCA',
+    name: "L.O.L. Surprise! O.M.G. Core Fashion Doll Class Prez & Friends Club Pack",
+    url: 'https://www.costco.ca/lol-surprise-omg-club-pack.product.1729011.html',
+    rating: 4.6,
+    reviewCount: 310,
+    costcoNumber: '1729011',
+    upcNumber: '035051569427',
+    modelNumber: '569427',
+    countryOfOrigin: 'China',
+    alertStatus: 'OK',
+    mainIssue: 'Packaging',
+    issueBreakdownText: 'Packaging(3)',
+    checkedAt: new Date(Date.now() - 3600000 * 5).toISOString(),
+    complaints: []
   }
 ];
 
@@ -410,7 +460,8 @@ export const INITIAL_WATCHLIST: WatchlistItem[] = [
     model: '594238',
     wm: '6000207908091',
     tcin: '89984321',
-    asin: 'b0d5b7m88x'
+    asin: 'b0d5b7m88x',
+    costco: '1689402'
   },
   {
     name: 'Little Tikes Power Cuts Chainsaw Toy',
@@ -426,7 +477,8 @@ export const INITIAL_WATCHLIST: WatchlistItem[] = [
     model: '569427',
     wm: '392019482',
     tcin: '82194820',
-    asin: 'b0859v5r4l'
+    asin: 'b0859v5r4l',
+    costco: '1729011'
   },
   {
     name: 'Bratz Original 20th Anniversary Fashion Doll Cameron',

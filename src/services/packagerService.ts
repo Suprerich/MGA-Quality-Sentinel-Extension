@@ -36,6 +36,8 @@ export async function generateExtensionZip(): Promise<Blob> {
       'https://www.amazon.com/*',
       'https://www.amazon.ca/*',
       'https://www.target.com/*',
+      'https://www.costco.com/*',
+      'https://www.costco.ca/*',
       'https://*/*'
     ],
     action: {
@@ -49,7 +51,9 @@ export async function generateExtensionZip(): Promise<Blob> {
           'https://www.walmart.ca/*',
           'https://www.amazon.com/*',
           'https://www.amazon.ca/*',
-          'https://www.target.com/*'
+          'https://www.target.com/*',
+          'https://www.costco.com/*',
+          'https://www.costco.ca/*'
         ],
         js: [
           'content.js',

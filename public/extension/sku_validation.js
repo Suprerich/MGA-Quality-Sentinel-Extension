@@ -20,8 +20,8 @@
       '<label style="font-size:12px;font-weight:600">My Tracked SKUs, one item per line</label>',
       '<textarea id="wlText" rows="5" style="box-sizing:border-box;width:100%;font-family:Consolas,monospace;font-size:12px;padding:6px" placeholder="Make It Mini Lord of the Rings,,,6000207908091&#10;Make It Mini Lord of the Rings | | | 6000207908091"></textarea>',
       '<div style="display:flex;gap:8px;align-items:center;margin:6px 0"><button id="wlSave" class="primary">Save Watchlist</button><button id="wlReload">Reload</button><span id="wlStatus" style="font-size:12px;color:#555"></span></div>',
-      '<label style="font-size:12px;font-weight:600">Open exact product, paste full URL or UPC / TCIN / WM# / ASIN</label>',
-      '<div style="display:flex;gap:8px;margin:4px 0 6px;flex-wrap:wrap"><input id="pxInput" type="text" style="flex:1;min-width:180px;padding:6px"><select id="pxSite" style="padding:6px"><option value="target">Target</option><option value="walmart_us">Walmart US</option><option value="walmart_ca">Walmart CA</option><option value="amazon_us">Amazon US</option><option value="amazon_ca">Amazon CA</option></select><button id="pxOpen" class="primary">Open</button></div>',
+      '<label style="font-size:12px;font-weight:600">Open exact product, paste full URL or UPC / TCIN / WM# / ASIN / Costco#</label>',
+      '<div style="display:flex;gap:8px;margin:4px 0 6px;flex-wrap:wrap"><input id="pxInput" type="text" style="flex:1;min-width:180px;padding:6px"><select id="pxSite" style="padding:6px"><option value="target">Target</option><option value="walmart_us">Walmart US</option><option value="walmart_ca">Walmart CA</option><option value="amazon_us">Amazon US</option><option value="amazon_ca">Amazon CA</option><option value="costco_us">Costco US</option><option value="costco_ca">Costco Canada</option></select><button id="pxOpen" class="primary">Open</button></div>',
       '<div id="wlMatch" style="font-size:12px;margin-top:8px"></div>'
     ].join('');
     if(anchor===document.body) document.body.appendChild(sec);
@@ -50,6 +50,8 @@
     else if(site==='walmart_ca') url=/^\d{5,}$/.test(id)?'https://www.walmart.ca/reviews/product/'+id:'https://www.walmart.ca/en/search?q='+encodeURIComponent(raw);
     else if(site==='amazon_us') url=/^[A-Z0-9]{10}$/i.test(id)?'https://www.amazon.com/product-reviews/'+id:'https://www.amazon.com/s?k='+encodeURIComponent(raw);
     else if(site==='amazon_ca') url=/^[A-Z0-9]{10}$/i.test(id)?'https://www.amazon.ca/product-reviews/'+id:'https://www.amazon.ca/s?k='+encodeURIComponent(raw);
+    else if(site==='costco_us') url=/^\d{4,}$/.test(id)?'https://www.costco.com/.product.'+id+'.html':'https://www.costco.com/CatalogSearch?dept=All&keyword='+encodeURIComponent(raw);
+    else if(site==='costco_ca') url=/^\d{4,}$/.test(id)?'https://www.costco.ca/.product.'+id+'.html':'https://www.costco.ca/CatalogSearch?dept=All&keyword='+encodeURIComponent(raw);
     if(url) chrome.tabs.create({url:url,active:true});
   }
 

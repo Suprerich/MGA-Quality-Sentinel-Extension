@@ -197,6 +197,8 @@ export const SearchScanView: React.FC<SearchScanViewProps> = ({
                 <option value="amazon_us">Amazon US</option>
                 <option value="amazon_ca">Amazon Canada</option>
                 <option value="target">Target</option>
+                <option value="costco_us">Costco US</option>
+                <option value="costco_ca">Costco Canada</option>
               </select>
             </div>
           </div>
@@ -551,7 +553,8 @@ export const SearchScanView: React.FC<SearchScanViewProps> = ({
                           item.modelNumber ? `Model: ${item.modelNumber}` : '',
                           item.walmartNumber ? `WM#: ${item.walmartNumber}` : '',
                           item.targetNumber ? `TCIN: ${item.targetNumber}` : '',
-                          item.amazonNumber ? `ASIN: ${item.amazonNumber}` : ''
+                          item.amazonNumber ? `ASIN: ${item.amazonNumber}` : '',
+                          item.costcoNumber ? `Costco#: ${item.costcoNumber}` : ''
                         ]
                           .filter(Boolean)
                           .slice(0, 2)

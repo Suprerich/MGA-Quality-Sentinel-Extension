@@ -16,18 +16,21 @@
 
   function platOf(r,url){
     var s=String(r||'').toLowerCase(), u=String(url||'').toLowerCase();
-    if(s.indexOf('walmart')>-1&&(s.indexOf('canada')>-1))return'WMCA';
+    if(s.indexOf('walmart')>-1&&(s.indexOf('canada')>-1||s.indexOf('.ca')>-1))return'WMCA';
     if(s.indexOf('walmart')>-1)return'WMUS';
-    if(s.indexOf('amazon')>-1&&s.indexOf('canada')>-1)return'AMZCA';
+    if(s.indexOf('amazon')>-1&&(s.indexOf('canada')>-1||s.indexOf('.ca')>-1))return'AMZCA';
     if(s.indexOf('amazon')>-1)return'AMZUS';
     if(s.indexOf('target')>-1)return'TARGET';
+    if(s.indexOf('costco')>-1&&(s.indexOf('canada')>-1||s.indexOf('.ca')>-1))return'COSTCOCA';
+    if(s.indexOf('costco')>-1)return'COSTCOUS';
     if(u.indexOf('walmart.ca')>-1)return'WMCA'; if(u.indexOf('walmart.com')>-1)return'WMUS';
     if(u.indexOf('amazon.ca')>-1)return'AMZCA'; if(u.indexOf('amazon.com')>-1)return'AMZUS';
-    if(u.indexOf('target.com')>-1)return'TARGET'; return 'OTHER';
+    if(u.indexOf('target.com')>-1)return'TARGET';
+    if(u.indexOf('costco.ca')>-1)return'COSTCOCA'; if(u.indexOf('costco.com')>-1)return'COSTCOUS'; return 'OTHER';
   }
   function idOf(rec){
     return normId(rec.upcNumber||rec.upc)||normId(rec.modelNumber||rec.model)||normId(rec.targetNumber||rec.tcin)||
-           normId(rec.walmartNumber||rec.wm)||normId(rec.amazonNumber||rec.asin)||('name:'+normId(rec.name||rec.productName));
+           normId(rec.costcoNumber||rec.costco)||normId(rec.walmartNumber||rec.wm)||normId(rec.amazonNumber||rec.asin)||('name:'+normId(rec.name||rec.productName));
   }
   function nameOf(rec){ return rec.name||rec.productName||''; }
 
