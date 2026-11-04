@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "MGA Quality Sentinel - Quality Monitoring Dashboard",
+  "version": "1.4.3",
+  "description": "Enterprise quality monitoring dashboard for QA/QAE teams tracking ratings, consumer complaints, and defect risks across Walmart, Amazon, and Target.",
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "scripting",
+    "downloads",
+    "sidePanel",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://www.walmart.com/*",
+    "https://www.walmart.ca/*",
+    "https://www.amazon.com/*",
+    "https://www.amazon.ca/*",
+    "https://www.target.com/*"
+  ],
+  "action": {
+    "default_title": "MGA Quality Sentinel",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.walmart.com/*",
+        "https://www.walmart.ca/*",
+        "https://www.amazon.com/*",
+        "https://www.amazon.ca/*",
+        "https://www.target.com/*"
+      ],
+      "js": [
+        "content.js",
+        "deep_review.js",
+        "classification_v2.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

@@ -1,0 +1,46 @@
+<!doctype html><html><head><meta charset="utf-8">
+<title>Quality Rating &amp; Complaint Analysis Tool</title>
+<link rel="stylesheet" href="style.css"></head><body>
+<h2>Quality Rating &amp; Complaint Analysis Tool</h2>
+<div class="note">Combined Quality tool for QA &amp; QC team use. <b>Search pages</b> show rating overview; <b>Product / review pages</b> show detailed complaint analysis.</div>
+<div class="searchBox">
+<label>Retailer <select id="platform"><option value="walmart_ca" selected>Walmart Canada</option><option value="walmart_us">Walmart US</option><option value="amazon_us">Amazon US</option><option value="amazon_ca">Amazon Canada</option><option value="target">Target</option></select></label>
+<label>Search keyword <input id="keyword" type="text" value="MGA Entertainment"></label>
+<label>Country of Origin keyword <input id="originKeyword" type="text" value="China"></label>
+<button id="searchScan" class="primary">Search &amp; Scan</button></div>
+<div class="controls">
+<label>Average rating threshold <input id="threshold" type="number" step="0.1" min="0" max="5" value="4.0"></label>
+<label class="checkbox"><input id="visibleOnly" type="checkbox" checked> Analyze visible reviews</label>
+<label class="checkbox"><input id="lowRatingOnly" type="checkbox"> Show only rating &lt; threshold (below)</label>
+<label class="checkbox"><input id="originOnly" type="checkbox"> Show only matching origin</label></div>
+<div class="toolbar"><button id="scan">Scan Current Page</button><button id="copy" disabled>Copy JSON</button><button id="csv" disabled>Export CSV</button></div>
+<div class="toolbar"><button id="deepLow">🔍 Deep Analyze Low-Rated Products</button><button id="deepExcel" disabled>Export Low-Rated Excel</button></div>
+<div id="status">Select retailer then Search &amp; Scan, or open a product/review page and click Scan Current Page.</div>
+<div id="ratingSection" class="hidden"><h3>Rating Overview</h3><div class="tableWrap"><table><thead><tr>
+<th>Retailer</th><th class="num">Walmart #</th><th class="num">Amazon #</th><th class="num">Target #</th><th class="num">UPC #</th>
+<th>Status</th><th>Avg Rating</th><th>Reviews</th><th class="origin">Country of Origin</th>
+<th>Main QA Issue</th><th class="breakdown">Issue Breakdown</th><th class="product">Product</th>
+</tr></thead><tbody id="ratingBody"></tbody></table></div></div>
+<div id="complaintSection" class="hidden"><div class="cards">
+<div class="card"><div class="label">Product</div><div id="productName" class="value">-</div></div>
+<div class="card"><div class="label">Retailer</div><div id="retailer" class="value">-</div></div>
+<div class="card"><div class="label">Average Rating</div><div id="avgRating" class="value">-</div></div>
+<div class="card"><div class="label">Alert Status</div><div id="alertStatus" class="value">-</div></div>
+<div class="card"><div class="label">Walmart #</div><div id="walmartNo" class="value">-</div></div>
+<div class="card"><div class="label">Amazon # / ASIN</div><div id="amazonNo" class="value">-</div></div>
+<div class="card"><div class="label">Target # / TCIN</div><div id="targetNo" class="value">-</div></div>
+<div class="card"><div class="label">UPC #</div><div id="upcNo" class="value">-</div></div>
+<div class="card"><div class="label">Review Count</div><div id="reviewCount" class="value">-</div></div>
+<div class="card"><div class="label">Country of Origin</div><div id="originValue" class="value">-</div></div>
+<div class="card"><div class="label">Complaint Count</div><div id="complaintCount" class="value">0</div></div>
+<div class="card"><div class="label">Top Keywords</div><div id="keywordSummary" class="value">-</div></div>
+</div><h3>Complaint Details</h3><div class="tableWrap"><table><thead><tr>
+<th>#</th><th>Sentiment</th><th>Issue Type</th><th>Keywords</th><th>User Tag</th><th>Time / Review Date</th><th>Complaint Content</th>
+</tr></thead><tbody id="complaintBody"></tbody></table></div></div>
+<div id="deepSection" class="hidden"><h3>Low-Rated Product Deep Analysis</h3><div id="deepStatus">Opt-in feature: after scanning a search results page, click "Deep Analyze Low-Rated Products" to auto-open each ALERT product and pull its low / quality-related reviews.</div><div class="tableWrap"><table><thead><tr><th class="product">Product</th><th>Avg Rating</th><th>Status</th><th>Review Rating</th><th>Sentiment</th><th>Issue Type</th><th>Keywords</th><th>User</th><th>Date</th><th class="comment">Low-Rated / Quality Complaint</th></tr></thead><tbody id="deepBody"></tbody></table></div></div>
+<script src="popup.js"></script>
+<script src="sku_core.js"></script>
+<script src="summary.js"></script>
+<script src="sku_validation.js"></script>
+<script src="trend_tracking.js"></script>
+</body></html>

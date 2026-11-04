@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "Quality Rating & Complaint Analysis Tool",
+  "version": "1.4.2",
+  "description": "Quality rating and complaint analysis tool. v1.4.2 restores the SKU Validation & Watchlist panel and supports pipe, comma, Chinese comma, or TAB input.",
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "scripting",
+    "downloads",
+    "sidePanel",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://www.walmart.com/*",
+    "https://www.walmart.ca/*",
+    "https://www.amazon.com/*",
+    "https://www.amazon.ca/*",
+    "https://www.target.com/*"
+  ],
+  "action": {
+    "default_title": "Quality Rating & Complaint Analysis Tool",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.walmart.com/*",
+        "https://www.walmart.ca/*",
+        "https://www.amazon.com/*",
+        "https://www.amazon.ca/*",
+        "https://www.target.com/*"
+      ],
+      "js": [
+        "content.js",
+        "deep_review.js",
+        "classification_v2.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

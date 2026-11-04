@@ -1,0 +1,6 @@
+{
+  "name": "MGA Quality Sentinel Dashboard",
+  "description": "Enterprise quality monitoring dashboard for QA/QAE teams tracking ratings, consumer complaints, and defect risks across Walmart, Amazon, and Target.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
