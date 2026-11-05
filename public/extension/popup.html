@@ -10,7 +10,7 @@
 <label>Country of Origin keyword <input id="originKeyword" type="text" value="China"></label>
 <button id="searchScan" class="primary">Search &amp; Scan</button></div>
 <div class="controls">
-<label>Average rating threshold <input id="threshold" type="number" step="0.1" min="0" max="5" value="4.0"></label>
+<label>Alert threshold <input id="threshold" type="number" step="0.1" min="0" max="5" value="3.5"></label>
 <label class="checkbox"><input id="visibleOnly" type="checkbox" checked> Analyze visible reviews</label>
 <label class="checkbox"><input id="lowRatingOnly" type="checkbox"> Show only rating &lt; threshold (below)</label>
 <label class="checkbox"><input id="originOnly" type="checkbox"> Show only matching origin</label></div>
@@ -19,13 +19,13 @@
 <div id="status">Select retailer then Search &amp; Scan, or open a product/review page and click Scan Current Page.</div>
 <div id="ratingSection" class="hidden"><h3>Rating Overview</h3><div class="tableWrap"><table><thead><tr>
 <th>Retailer</th><th class="num">Walmart #</th><th class="num">Amazon #</th><th class="num">Target #</th><th class="num">UPC #</th>
-<th>Status</th><th>Avg Rating</th><th>Reviews</th><th class="origin">Country of Origin</th>
+<th>Status</th><th>Rating</th><th>Reviews</th><th class="origin">Country of Origin</th>
 <th>Main QA Issue</th><th class="breakdown">Issue Breakdown</th><th class="product">Product</th>
 </tr></thead><tbody id="ratingBody"></tbody></table></div></div>
 <div id="complaintSection" class="hidden"><div class="cards">
 <div class="card"><div class="label">Product</div><div id="productName" class="value">-</div></div>
 <div class="card"><div class="label">Retailer</div><div id="retailer" class="value">-</div></div>
-<div class="card"><div class="label">Average Rating</div><div id="avgRating" class="value">-</div></div>
+<div class="card"><div class="label">Rating</div><div id="avgRating" class="value">-</div></div>
 <div class="card"><div class="label">Alert Status</div><div id="alertStatus" class="value">-</div></div>
 <div class="card"><div class="label">Walmart #</div><div id="walmartNo" class="value">-</div></div>
 <div class="card"><div class="label">Amazon # / ASIN</div><div id="amazonNo" class="value">-</div></div>
@@ -38,7 +38,7 @@
 </div><h3>Complaint Details</h3><div class="tableWrap"><table><thead><tr>
 <th>#</th><th>Sentiment</th><th>Issue Type</th><th>Keywords</th><th>User Tag</th><th>Time / Review Date</th><th>Complaint Content</th>
 </tr></thead><tbody id="complaintBody"></tbody></table></div></div>
-<div id="deepSection" class="hidden"><h3>Low-Rated Product Deep Analysis</h3><div id="deepStatus">Opt-in feature: after scanning a search results page, click "Deep Analyze Low-Rated Products" to auto-open each ALERT product and pull its low / quality-related reviews.</div><div class="tableWrap"><table><thead><tr><th class="product">Product</th><th>Avg Rating</th><th>Status</th><th>Review Rating</th><th>Sentiment</th><th>Issue Type</th><th>Keywords</th><th>User</th><th>Date</th><th class="comment">Low-Rated / Quality Complaint</th></tr></thead><tbody id="deepBody"></tbody></table></div></div>
+<div id="deepSection" class="hidden"><h3>Low-Rated Product Deep Analysis</h3><div id="deepStatus">Opt-in feature: after scanning a search results page, click "Deep Analyze Low-Rated Products" to auto-open each ALERT product and pull its low / quality-related reviews.</div><div class="tableWrap"><table><thead><tr><th class="product">Product</th><th>Rating</th><th>Status</th><th>Review Rating</th><th>Sentiment</th><th>Issue Type</th><th>Keywords</th><th>User</th><th>Date</th><th class="comment">Low-Rated / Quality Complaint</th></tr></thead><tbody id="deepBody"></tbody></table></div></div>
 <script src="popup.js"></script>
 <script src="sku_core.js"></script>
 <script src="summary.js"></script>

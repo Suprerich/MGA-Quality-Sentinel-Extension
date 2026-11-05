@@ -126,14 +126,13 @@ export const SearchScanView: React.FC<SearchScanViewProps> = ({
 
   const isScanning = progress.status !== 'idle' && progress.status !== 'completed' && progress.status !== 'cancelled' && progress.status !== 'error';
 
-  // Metrics
-  const alertProducts = products.filter(
-    (p) => p.alertStatus === 'ALERT' || (typeof p.rating === 'number' && p.rating < threshold)
+  // Rule 2: Strictly item.rating != null && item.rating < threshold
+  const lowRatedProducts = products.filter(
+    (p) => typeof p.rating === 'number' && !isNaN(p.rating) && p.rating < threshold
   );
-  const ratedProducts = products.filter((p) => typeof p.rating === 'number');
-  const avgRating =
-    ratedProducts.length > 0
-      ? ratedProducts.reduce((sum, p) => sum + (p.rating || 0), 0) / ratedProducts.length
+  const lowestRating =
+    lowRatedProducts.length > 0
+      ? Number(Math.min(...lowRatedProducts.map((p) => p.rating as number)).toFixed(1))
       : null;
 
   return (
@@ -148,7 +147,7 @@ export const SearchScanView: React.FC<SearchScanViewProps> = ({
         </p>
       </div>
 
-      {/* Active Product Session Banner (Requirement 1, 2, 4, 7) */}
+      {/* Active Product Session Banner (Requirements 1, 2, 5, 6, 7) */}
       {currentSession && Object.keys(currentSession.platformResults || {}).length > 0 && (
         <div className="rounded-2xl border border-[#007AFF]/30 bg-gradient-to-r from-[#007AFF]/5 via-[#007AFF]/10 to-transparent p-5 dark:border-[#007AFF]/40 dark:from-[#007AFF]/10 dark:via-[#007AFF]/15 shadow-2xs space-y-3.5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -193,7 +192,7 @@ export const SearchScanView: React.FC<SearchScanViewProps> = ({
                   </span>
                 )}
                 <span>
-                  · {language === 'en' ? 'Accumulating cross-platform results' : '各平台数据持续累积中'}
+                  · {language === 'en' ? 'Multi-channel cross-platform synthesis' : '跨平台数据持续累积中'}
                 </span>
               </div>
             </div>
@@ -209,7 +208,31 @@ export const SearchScanView: React.FC<SearchScanViewProps> = ({
             )}
           </div>
 
-          {/* 7 Channels Status Strip */}
+          {/* Cross-Platform Summary Status Strip (Requirement 6) */}
+          <div className="flex flex-wrap items-center gap-3 py-2 px-3 bg-white/70 dark:bg-black/20 rounded-xl border border-[#007AFF]/20 text-xs">
+            <span className="font-semibold text-neutral-800 dark:text-neutral-200">
+              {language === 'en' ? 'Queried' : '已查询'}: <b className="text-[#007AFF] font-mono">{Object.keys(currentSession.platformResults || {}).length} / 7</b> {language === 'en' ? 'platforms' : '个平台'}
+            </span>
+            <span className="text-[#8E8E93]">·</span>
+            <span className="text-neutral-700 dark:text-neutral-300">
+              {language === 'en' ? 'Total Scanned' : '共扫描'}: <b className="font-mono">{currentSession.summary?.totalScanned ?? products.length}</b> {language === 'en' ? 'items' : '个商品'}
+            </span>
+            <span className="text-[#8E8E93]">·</span>
+            <span className="text-neutral-700 dark:text-neutral-300">
+              {language === 'en' ? 'Below Threshold' : '低分商品'}: <b className={`font-mono ${(currentSession.summary?.totalLowRated ?? lowRatedProducts.length) > 0 ? 'text-[#FF3B30]' : 'text-[#34C759]'}`}>{currentSession.summary?.totalLowRated ?? lowRatedProducts.length}</b> {language === 'en' ? 'items' : '个'}
+            </span>
+            <span className="text-[#8E8E93]">·</span>
+            <span className="text-neutral-700 dark:text-neutral-300">
+              {language === 'en' ? 'Lowest Rating' : '全部平台中的最低评分'}:{' '}
+              {currentSession.summary?.lowestRating != null ? (
+                <b className="font-mono text-[#FF3B30]">{currentSession.summary.lowestRating}★</b>
+              ) : (
+                <span className="text-[#34C759] font-medium">{language === 'en' ? 'No items below threshold' : '未发现低于警戒值的商品'}</span>
+              )}
+            </span>
+          </div>
+
+          {/* 7 Channels Status Strip (Requirement 5) */}
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 pt-1">
             {PLAT_ORDER.map((pCode) => {
               const res = currentSession.platformResults?.[pCode];
@@ -224,12 +247,19 @@ export const SearchScanView: React.FC<SearchScanViewProps> = ({
                 COSTCOCA: 'costco_ca'
               }[pCode];
 
+              const total = res?.totalScanned ?? (res?.products?.length ?? 0);
+              const lowCount = res?.lowRatedCount ?? (res?.lowRatedItems?.length ?? 0);
+              const lowest = res?.lowestRating ?? null;
+              const queryTime = res?.scannedAt
+                ? new Date(res.scannedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                : '';
+
               return (
                 <div
                   key={pCode}
-                  className={`p-2 rounded-xl border text-xs flex flex-col justify-between transition-all ${
+                  className={`p-2.5 rounded-xl border text-xs flex flex-col justify-between transition-all ${
                     isScanned
-                      ? res.alertStatus === 'ALERT'
+                      ? lowCount > 0
                         ? 'border-[#FF3B30]/40 bg-[#FF3B30]/10 text-[#FF3B30]'
                         : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 font-medium'
                       : 'border-neutral-200 dark:border-neutral-800 bg-white/70 dark:bg-[#1C1C1E]/70 text-[#8E8E93]'
@@ -255,14 +285,34 @@ export const SearchScanView: React.FC<SearchScanViewProps> = ({
                     )}
                   </div>
 
-                  <div className="mt-1 font-mono text-[11px]">
+                  <div className="mt-1.5 space-y-0.5 text-[10px] font-mono leading-tight">
                     {isScanned ? (
-                      <div className="flex items-center justify-between">
-                        <b>{typeof res.rating === 'number' ? `${res.rating.toFixed(1)}★` : (language === 'en' ? 'Not acquired' : '未获取')}</b>
-                        <span className="opacity-75">{typeof res.reviewCount === 'number' ? `(${res.reviewCount})` : ''}</span>
-                      </div>
+                      <>
+                        <div className="text-neutral-700 dark:text-neutral-300">
+                          {language === 'en' ? 'Scanned' : '扫描'}：<b>{total}</b> {language === 'en' ? 'items' : '个商品'}
+                        </div>
+                        <div className={lowCount > 0 ? 'text-[#FF3B30] font-bold' : 'text-[#34C759]'}>
+                          {language === 'en' ? `< ${threshold.toFixed(1)}` : `低于${threshold.toFixed(1)}`}：<b>{lowCount}</b> {language === 'en' ? 'items' : '个'}
+                        </div>
+                        <div className="font-bold">
+                          {lowest != null ? (
+                            <span className="text-[#FF3B30]">
+                              {language === 'en' ? 'Lowest' : '最低评分'}：{lowest.toFixed(1)}★
+                            </span>
+                          ) : (
+                            <span className="text-[#34C759] font-normal">
+                              {language === 'en' ? 'No Low Rating' : '无低分'}
+                            </span>
+                          )}
+                        </div>
+                        {queryTime && (
+                          <div className="text-[#8E8E93] text-[9px] pt-0.5">
+                            {queryTime}
+                          </div>
+                        )}
+                      </>
                     ) : (
-                      <span className="text-[#8E8E93] text-[10px]">{t.statusNotScanned || '未查询'}</span>
+                      <span className="text-[#8E8E93] text-[10px] block py-1">{t.statusNotScanned || '未查询'}</span>
                     )}
                   </div>
                 </div>
@@ -500,64 +550,72 @@ export const SearchScanView: React.FC<SearchScanViewProps> = ({
       {/* 4. Active Scan Results Area */}
       {products.length > 0 && (
         <div className="space-y-6 animate-fade-in">
-          {/* Result Metric Banner & Action Hub */}
+          {/* Result Metric Banner & Action Hub (Requirement 3 & 7: No average rating) */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {/* Metric 1: Total Scanned */}
             <div className="rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] p-4 shadow-2xs dark:border-[#2C2C2E] dark:bg-[#1C1C1E]">
               <div className="text-[11px] font-medium text-[#8E8E93] uppercase tracking-wider">
-                Total Products
+                {language === 'en' ? 'Total Products Scanned' : '扫描商品总数'}
               </div>
               <div className="mt-1 flex items-baseline gap-2">
                 <span className="font-mono text-2xl font-bold text-[#1D1D1F] dark:text-[#F5F5F7] tabular-nums">
                   {products.length}
                 </span>
-                <span className="text-[11px] text-[#8E8E93]">items</span>
+                <span className="text-[11px] text-[#8E8E93]">{language === 'en' ? 'items' : '个商品'}</span>
               </div>
             </div>
 
             {/* Metric 2: Alert Products Below Threshold */}
             <div className="rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] p-4 shadow-2xs dark:border-[#2C2C2E] dark:bg-[#1C1C1E]">
               <div className="text-[11px] font-medium text-[#8E8E93] uppercase tracking-wider flex items-center justify-between">
-                <span>Below Threshold</span>
+                <span>{language === 'en' ? 'Below Threshold' : '低于警戒值商品'}</span>
                 <span className="text-[#FF3B30] font-mono text-[10px]">&lt; {threshold.toFixed(1)}</span>
               </div>
               <div className="mt-1 flex items-baseline gap-2">
                 <span
                   className={`font-mono text-2xl font-bold tabular-nums ${
-                    alertProducts.length > 0 ? 'text-[#FF3B30]' : 'text-[#34C759]'
+                    lowRatedProducts.length > 0 ? 'text-[#FF3B30]' : 'text-[#34C759]'
                   }`}
                 >
-                  {alertProducts.length}
+                  {lowRatedProducts.length}
                 </span>
-                <span className="text-[11px] text-[#8E8E93]">breached</span>
+                <span className="text-[11px] text-[#8E8E93]">{language === 'en' ? 'flagged' : '个'}</span>
               </div>
             </div>
 
-            {/* Metric 3: Average Star Rating */}
+            {/* Metric 3: Lowest Rating (Requirement 7) */}
             <div className="rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] p-4 shadow-2xs dark:border-[#2C2C2E] dark:bg-[#1C1C1E]">
               <div className="text-[11px] font-medium text-[#8E8E93] uppercase tracking-wider">
-                Average Rating
+                {language === 'en' ? 'Lowest Rating' : '最低评分'}
               </div>
               <div className="mt-1 flex items-baseline gap-2">
-                <span className="font-mono text-2xl font-bold text-[#1D1D1F] dark:text-[#F5F5F7] tabular-nums">
-                  {avgRating !== null ? avgRating.toFixed(2) : '—'}
-                </span>
-                <div className="flex text-[#FF9500] text-xs">
-                  {'★'.repeat(Math.round(avgRating || 0))}
-                </div>
+                {lowestRating !== null ? (
+                  <>
+                    <span className="font-mono text-2xl font-bold text-[#FF3B30] tabular-nums">
+                      {lowestRating.toFixed(1)}★
+                    </span>
+                    <span className="text-[10px] text-[#8E8E93] truncate">
+                      {language === 'en' ? 'in low-rated' : '低分最小值'}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-xs font-semibold text-[#34C759]">
+                    {language === 'en' ? 'No items < threshold' : '未发现低于警戒值商品'}
+                  </span>
+                )}
               </div>
             </div>
 
             {/* Metric 4: Customer Complaints Analyzed */}
             <div className="rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] p-4 shadow-2xs dark:border-[#2C2C2E] dark:bg-[#1C1C1E]">
               <div className="text-[11px] font-medium text-[#8E8E93] uppercase tracking-wider">
-                Customer Reviews
+                {language === 'en' ? 'Customer Reviews' : '抓取评论数'}
               </div>
               <div className="mt-1 flex items-baseline gap-2">
                 <span className="font-mono text-2xl font-bold text-[#1D1D1F] dark:text-[#F5F5F7] tabular-nums">
                   {complaints.length}
                 </span>
-                <span className="text-[11px] text-[#8E8E93]">analyzed</span>
+                <span className="text-[11px] text-[#8E8E93]">{language === 'en' ? 'analyzed' : '条'}</span>
               </div>
             </div>
           </div>
@@ -575,7 +633,7 @@ export const SearchScanView: React.FC<SearchScanViewProps> = ({
 
             <div className="flex flex-wrap items-center gap-2">
               {/* Deep Analyze All Low-Rated */}
-              {alertProducts.length > 0 && (
+              {lowRatedProducts.length > 0 && (
                 <button
                   onClick={onDeepAnalyzeLowRated}
                   disabled={isDeepAnalyzing}
@@ -586,7 +644,7 @@ export const SearchScanView: React.FC<SearchScanViewProps> = ({
                   ) : (
                     <Zap className="h-3.5 w-3.5" />
                   )}
-                  <span>{t.btnDeepAnalyzeAll} ({alertProducts.length})</span>
+                  <span>{t.btnDeepAnalyzeAll} ({lowRatedProducts.length})</span>
                 </button>
               )}
 
@@ -622,7 +680,7 @@ export const SearchScanView: React.FC<SearchScanViewProps> = ({
           {/* Result Sub-Navigation Tabs */}
           <div className="border-b border-[#E5E5EA] dark:border-[#2C2C2E] flex gap-2 overflow-x-auto scrollbar-none">
             {[
-              { id: 'overview', label: t.tabOverview, count: products.length },
+              { id: 'overview', label: language === 'en' ? `Low-Rated Items (< ${threshold.toFixed(1)})` : `低分商品列表 (< ${threshold.toFixed(1)})`, count: lowRatedProducts.length },
               { id: 'matrix', label: t.tabCrossPlatform, count: groups.length },
               { id: 'complaints', label: t.tabComplaints, count: complaints.length },
               { id: 'deep', label: t.tabDeepReview, count: deepResults.length },
@@ -644,7 +702,7 @@ export const SearchScanView: React.FC<SearchScanViewProps> = ({
                   <span
                     className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono ${
                       activeResultTab === tab.id
-                        ? 'bg-[#007AFF]/10 text-[#007AFF]'
+                        ? tab.id === 'overview' && lowRatedProducts.length > 0 ? 'bg-[#FF3B30]/10 text-[#FF3B30]' : 'bg-[#007AFF]/10 text-[#007AFF]'
                         : 'bg-[#F2F2F7] dark:bg-[#2C2C2E] text-[#8E8E93]'
                     }`}
                   >
@@ -655,132 +713,161 @@ export const SearchScanView: React.FC<SearchScanViewProps> = ({
             ))}
           </div>
 
-          {/* Subview 1: Products Overview List */}
+          {/* Subview 1: Products Overview List (Requirements 1 & 8: Low-Rated Items Only) */}
           {activeResultTab === 'overview' && (
-            <div className="rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] dark:border-[#2C2C2E] dark:bg-[#1C1C1E] overflow-hidden shadow-2xs">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-[#E5E5EA] dark:border-[#2C2C2E] bg-[#FAFAFC] dark:bg-[#18181A] text-[11px] font-semibold text-[#8E8E93] uppercase tracking-wider">
-                      <th className="py-3 px-4">{t.colProduct}</th>
-                      <th className="py-3 px-3">{t.colPlatform}</th>
-                      <th className="py-3 px-3">{t.colIdentifiers}</th>
-                      <th className="py-3 px-3 text-right">{t.colRating}</th>
-                      <th className="py-3 px-3 text-right">{t.colReviews}</th>
-                      <th className="py-3 px-3 text-center">{t.colAlertStatus}</th>
-                      <th className="py-3 px-4">{t.colIssues}</th>
-                      <th className="py-3 px-3 text-right">{t.colActions}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#E5E5EA] dark:divide-[#2C2C2E] text-xs">
-                    {products.map((item) => {
-                      const isAlert =
-                        item.alertStatus === 'ALERT' ||
-                        (typeof item.rating === 'number' && item.rating < threshold);
-                      const idStr =
-                        [
-                          item.upcNumber ? `UPC: ${item.upcNumber}` : '',
-                          item.modelNumber ? `Model: ${item.modelNumber}` : '',
-                          item.walmartNumber ? `WM#: ${item.walmartNumber}` : '',
-                          item.targetNumber ? `TCIN: ${item.targetNumber}` : '',
-                          item.amazonNumber ? `ASIN: ${item.amazonNumber}` : '',
-                          item.costcoNumber ? `Costco#: ${item.costcoNumber}` : ''
-                        ]
-                          .filter(Boolean)
-                          .slice(0, 2)
-                          .join(' · ') || '—';
+            <div className="space-y-4">
+              {lowRatedProducts.length === 0 ? (
+                <div className="p-8 text-center space-y-2 bg-[#FAFAFC] dark:bg-[#18181A] rounded-2xl border border-[#E5E5EA] dark:border-[#2C2C2E]">
+                  <CheckCircle className="h-8 w-8 text-[#34C759] mx-auto" />
+                  <div className="text-sm font-bold text-[#1D1D1F] dark:text-[#F5F5F7]">
+                    {language === 'en' ? 'No items below alert threshold' : '未发现低于警戒值的商品'}
+                  </div>
+                  <p className="text-xs text-[#8E8E93] max-w-md mx-auto">
+                    {language === 'en'
+                      ? `Total ${products.length} product variant(s) scanned. All maintain ratings ≥ ${threshold.toFixed(1)}★. No quality alerts triggered.`
+                      : `本次共扫描 ${products.length} 个在售商品/规格，所有商品评分均达到或高于警戒阈值 ${threshold.toFixed(1)}★。系统无需列出达标商品。`}
+                  </p>
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-[#FF3B30]/20 bg-[#FFFFFF] dark:border-[#2C2C2E] dark:bg-[#1C1C1E] overflow-hidden shadow-2xs">
+                  <div className="p-3 bg-[#FF3B30]/5 border-b border-[#FF3B30]/15 flex items-center justify-between text-xs">
+                    <span className="font-semibold text-[#FF3B30] flex items-center gap-1.5">
+                      <AlertTriangle className="h-4 w-4" />
+                      <span>
+                        {language === 'en' ? `Showing ${lowRatedProducts.length} item(s) below ${threshold.toFixed(1)}★ (Total ${products.length} scanned)` : `展示 ${lowRatedProducts.length} 个低于警戒值 (${threshold.toFixed(1)}★) 的商品（共扫描 ${products.length} 个）`}
+                      </span>
+                    </span>
+                    <span className="text-[#8E8E93] text-[11px]">
+                      {language === 'en' ? 'Ratings ≥ threshold are filtered out' : '达标商品已自动过滤，不计入低分列表'}
+                    </span>
+                  </div>
 
-                      return (
-                        <tr
-                          key={item.id}
-                          className="hover:bg-[#F2F2F7]/50 dark:hover:bg-[#2C2C2E]/40 transition-colors"
-                        >
-                          {/* Product Name & Source Site */}
-                          <td className="py-3 px-4 max-w-sm">
-                            <div className="font-medium text-[#1D1D1F] dark:text-[#F5F5F7] line-clamp-2">
-                              {item.name}
-                            </div>
-                            <div className="text-[11px] text-[#8E8E93] mt-0.5">
-                              Origin: {item.countryOfOrigin || 'UNKNOWN'}
-                            </div>
-                          </td>
-
-                          {/* Platform Badge */}
-                          <td className="py-3 px-3 whitespace-nowrap">
-                            <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-[#F2F2F7] dark:bg-[#2C2C2E] text-[#1D1D1F] dark:text-[#F5F5F7]">
-                              {item.retailer}
-                            </span>
-                          </td>
-
-                          {/* Identifiers */}
-                          <td className="py-3 px-3 font-mono text-[11px] text-[#8E8E93] whitespace-nowrap">
-                            {idStr}
-                          </td>
-
-                          {/* Rating */}
-                          <td className="py-3 px-3 text-right whitespace-nowrap">
-                            <span
-                              className={`font-mono text-sm font-bold tabular-nums ${
-                                isAlert
-                                  ? 'text-[#FF3B30]'
-                                  : typeof item.rating === 'number'
-                                  ? 'text-[#34C759]'
-                                  : 'text-[#8E8E93]'
-                              }`}
-                            >
-                              {item.rating !== null ? item.rating.toFixed(1) : '—'}
-                            </span>
-                          </td>
-
-                          {/* Review Count */}
-                          <td className="py-3 px-3 text-right font-mono text-xs text-[#8E8E93] tabular-nums whitespace-nowrap">
-                            {item.reviewCount !== null ? item.reviewCount.toLocaleString() : '—'}
-                          </td>
-
-                          {/* Alert Status */}
-                          <td className="py-3 px-3 text-center whitespace-nowrap">
-                            <span
-                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase inline-flex items-center gap-1 ${
-                                isAlert
-                                  ? 'bg-[#FF3B30]/10 text-[#FF3B30]'
-                                  : 'bg-[#34C759]/10 text-[#34C759]'
-                              }`}
-                            >
-                              {isAlert ? <AlertTriangle className="h-3 w-3" /> : <CheckCircle className="h-3 w-3" />}
-                              <span>{isAlert ? t.statusAlert : t.statusPass}</span>
-                            </span>
-                          </td>
-
-                          {/* Issues & Breakdown */}
-                          <td className="py-3 px-4 max-w-xs">
-                            <div className="text-xs text-[#1D1D1F] dark:text-[#F5F5F7] font-medium line-clamp-1">
-                              {item.mainIssue || 'N/A'}
-                            </div>
-                            <div className="text-[11px] text-[#8E8E93] line-clamp-1 mt-0.5">
-                              {item.issueBreakdownText || 'No recurring issues logged'}
-                            </div>
-                          </td>
-
-                          {/* External Link */}
-                          <td className="py-3 px-3 text-right whitespace-nowrap">
-                            {item.url && (
-                              <a
-                                href={item.url}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex items-center gap-1 text-xs text-[#007AFF] hover:underline"
-                              >
-                                <span>Link</span>
-                                <ExternalLink className="h-3 w-3" />
-                              </a>
-                            )}
-                          </td>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-[#E5E5EA] dark:border-[#2C2C2E] bg-[#FAFAFC] dark:bg-[#18181A] text-[11px] font-semibold text-[#8E8E93] uppercase tracking-wider">
+                          <th className="py-3 px-3">{language === 'en' ? 'Image' : '商品图片'}</th>
+                          <th className="py-3 px-4">{t.colProduct}</th>
+                          <th className="py-3 px-3">{language === 'en' ? 'Price' : '价格'}</th>
+                          <th className="py-3 px-3">{t.colPlatform}</th>
+                          <th className="py-3 px-3">{t.colIdentifiers}</th>
+                          <th className="py-3 px-3 text-right">{t.colRating}</th>
+                          <th className="py-3 px-3 text-right">{t.colReviews}</th>
+                          <th className="py-3 px-4">{t.colIssues}</th>
+                          <th className="py-3 px-3 text-right">{t.colActions}</th>
                         </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                      </thead>
+                      <tbody className="divide-y divide-[#E5E5EA] dark:divide-[#2C2C2E] text-xs">
+                        {lowRatedProducts.map((item) => {
+                          const idStr =
+                            [
+                              item.upcNumber ? `UPC: ${item.upcNumber}` : '',
+                              item.modelNumber ? `Model: ${item.modelNumber}` : '',
+                              item.walmartNumber ? `WM#: ${item.walmartNumber}` : '',
+                              item.targetNumber ? `TCIN: ${item.targetNumber}` : '',
+                              item.amazonNumber ? `ASIN: ${item.amazonNumber}` : '',
+                              item.costcoNumber ? `Costco#: ${item.costcoNumber}` : ''
+                            ]
+                              .filter(Boolean)
+                              .slice(0, 2)
+                              .join(' · ') || '—';
+
+                          return (
+                            <tr
+                              key={item.id}
+                              className="hover:bg-[#FF3B30]/5 dark:hover:bg-[#3D1412]/30 transition-colors"
+                            >
+                              {/* Product Thumbnail */}
+                              <td className="py-2.5 px-3 whitespace-nowrap">
+                                {item.imageUrl ? (
+                                  <img
+                                    src={item.imageUrl}
+                                    alt={item.name}
+                                    className="h-12 w-12 object-contain rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white"
+                                    onError={(e) => {
+                                      // Fallback on broken image
+                                      (e.target as HTMLElement).style.display = 'none';
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="h-12 w-12 rounded-lg bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-neutral-400 text-xs">
+                                    MGA
+                                  </div>
+                                )}
+                              </td>
+
+                              {/* Product Name & Source Site */}
+                              <td className="py-3 px-4 max-w-sm">
+                                <div className="font-semibold text-[#1D1D1F] dark:text-[#F5F5F7] line-clamp-2">
+                                  {item.name}
+                                </div>
+                                <div className="text-[11px] text-[#8E8E93] mt-0.5">
+                                  Origin: {item.countryOfOrigin || 'UNKNOWN'}
+                                </div>
+                              </td>
+
+                              {/* Price */}
+                              <td className="py-3 px-3 whitespace-nowrap font-mono font-medium text-neutral-800 dark:text-neutral-200">
+                                {item.price || '—'}
+                              </td>
+
+                              {/* Platform Badge */}
+                              <td className="py-3 px-3 whitespace-nowrap">
+                                <span className="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-[#F2F2F7] dark:bg-[#2C2C2E] text-[#1D1D1F] dark:text-[#F5F5F7]">
+                                  {item.retailer}
+                                </span>
+                              </td>
+
+                              {/* Identifiers */}
+                              <td className="py-3 px-3 font-mono text-[11px] text-[#8E8E93] whitespace-nowrap">
+                                {idStr}
+                              </td>
+
+                              {/* Rating */}
+                              <td className="py-3 px-3 text-right whitespace-nowrap">
+                                <span className="font-mono text-sm font-bold text-[#FF3B30] tabular-nums">
+                                  {item.rating !== null ? item.rating.toFixed(1) : '—'}★
+                                </span>
+                              </td>
+
+                              {/* Review Count */}
+                              <td className="py-3 px-3 text-right font-mono text-xs text-[#8E8E93] tabular-nums whitespace-nowrap">
+                                {item.reviewCount !== null ? `${item.reviewCount.toLocaleString()} ${language === 'en' ? 'reviews' : '条'}` : '—'}
+                              </td>
+
+                              {/* Issues & Breakdown */}
+                              <td className="py-3 px-4 max-w-xs">
+                                <div className="text-xs text-[#FF3B30] font-semibold line-clamp-1">
+                                  {item.mainIssue || 'Quality Concern'}
+                                </div>
+                                <div className="text-[11px] text-[#8E8E93] line-clamp-1 mt-0.5">
+                                  {item.issueBreakdownText || 'Flagged for quality review'}
+                                </div>
+                              </td>
+
+                              {/* External Link: Open Product Page Button (Requirement 8) */}
+                              <td className="py-3 px-3 text-right whitespace-nowrap">
+                                {item.url && (
+                                  <a
+                                    href={item.url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-white bg-[#007AFF] hover:bg-[#0062CC] rounded-lg transition-colors shadow-2xs cursor-pointer"
+                                    title={language === 'en' ? 'Open product page in retail store' : '打开商品页面核对真实数据'}
+                                  >
+                                    <span>{language === 'en' ? 'Open Page' : '打开商品页面'}</span>
+                                    <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

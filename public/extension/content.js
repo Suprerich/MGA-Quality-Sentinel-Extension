@@ -401,6 +401,29 @@ function summarizeIssues(texts){
 }
 
 /* ===== SECTION 8: Search Page Helpers ===== */
+function parsePrice(container, text){
+  try{
+    const priceEl=container.querySelector('[data-test*="current-price"],[data-automation-id*="product-price"],.a-price .a-offscreen,.price,[class*="price" i]');
+    if(priceEl){
+      const t=cleanText(priceEl.innerText||priceEl.textContent||'');
+      const m=t.match(/\$\s*[\d,]+(?:\.\d{2})?/);
+      if(m)return m[0].replace(/\s+/g,'');
+    }
+    const m=text.match(/\$\s*[\d,]+(?:\.\d{2})?/);
+    if(m)return m[0].replace(/\s+/g,'');
+  }catch(e){}
+  return'';
+}
+function parseImageUrl(container){
+  try{
+    const img=container.querySelector('img[src],img[data-src],picture img');
+    if(img){
+      const s=img.getAttribute('src')||img.getAttribute('data-src')||'';
+      if(s&&!s.startsWith('data:image/svg'))return s;
+    }
+  }catch(e){}
+  return'';
+}
 function bestName(container,link){
   const candidates=[];if(link)candidates.push(link.getAttribute('aria-label'),link.textContent);
   container.querySelectorAll('img[alt],h1,h2,h3,[data-automation-id*=product-title],[data-testid*=product-title],[data-component-type=s-search-result] h2,#productTitle,[data-test=product-title],span').forEach(el=>{
@@ -454,7 +477,9 @@ function extractFromContainer(container,url,threshold,analyzeVisibleText,originK
   if(rating===null)rating=parseRating(allText);if(reviewCount===null)reviewCount=parseReviewCount(allText);
   let alertStatus='NEED MANUAL CHECK';if(typeof rating==='number'&&!isNaN(rating)){alertStatus=rating<threshold?'ALERT':'OK'}/* v1.2.1: strict < to match WMCA "below 4.0" */
   const issueSummary=summarizeIssues(collectCandidateText(container,analyzeVisibleText));
-  return{retailer:getRetailer(),walmartNumber:parseWalmartNumber(allText,url),amazonNumber:parseAmazonNumber(allText,url),targetNumber:parseTargetNumber(allText,url),costcoNumber:parseCostcoNumber(allText,url),upcNumber:parseUPC(allText),modelNumber:parseModelNumber(allText),rating,reviewCount,countryOfOrigin:detectCountryOfOrigin(allText,originKeyword),alertStatus,url,...issueSummary};
+  const price=parsePrice(container,allText);
+  const imageUrl=parseImageUrl(container);
+  return{retailer:getRetailer(),walmartNumber:parseWalmartNumber(allText,url),amazonNumber:parseAmazonNumber(allText,url),targetNumber:parseTargetNumber(allText,url),costcoNumber:parseCostcoNumber(allText,url),upcNumber:parseUPC(allText),modelNumber:parseModelNumber(allText),rating,reviewCount,price,imageUrl,countryOfOrigin:detectCountryOfOrigin(allText,originKeyword),alertStatus,url,...issueSummary};
 }
 function scanSearchPage(threshold,analyzeVisibleText,originKeyword){
   const checkedAt=new Date().toISOString(),sourceSite=location.hostname,map=new Map(),links=getProductLinks();

@@ -85,6 +85,7 @@ export interface ProductItem {
   name: string;
   url: string;
   imageUrl?: string;
+  price?: string;
   rating: number | null;
   reviewCount: number | null;
   walmartNumber?: string;
@@ -235,6 +236,24 @@ export interface ProductIdentifiers {
   costcoNumber?: string;
 }
 
+export interface LowRatedItem {
+  id: string;
+  productName: string;
+  rating: number;
+  reviewCount?: number | null;
+  price?: string;
+  productUrl: string;
+  imageUrl?: string;
+  sku?: string;
+  upc?: string;
+  model?: string;
+  platformNumber?: string;
+  countryOfOrigin?: string;
+  mainIssue?: string;
+  issueBreakdownText?: string;
+  scannedAt: string;
+}
+
 export interface PlatformResultEntry {
   platform: PlatformCode;
   retailerId: RetailerId;
@@ -242,13 +261,19 @@ export interface PlatformResultEntry {
   url: string;
   sourceUrl?: string;
   tabId?: number | null;
-  rating: number | null;
-  reviewCount: number | null;
+  searchKeyword?: string;
+  totalScanned: number;
+  lowRatedCount: number;
+  threshold: number;
+  lowestRating: number | null;
+  lowRatedItems: LowRatedItem[];
+  rating?: number | null;
+  reviewCount?: number | null;
   productName?: string;
-  alertStatus: AlertStatus;
+  alertStatus?: AlertStatus;
   countryOfOrigin?: string;
-  products: ProductItem[];
-  complaints: Complaint[];
+  products?: ProductItem[];
+  complaints?: Complaint[];
   deepResults?: any[];
   keywordSummary?: { keyword: string; count: number }[];
   scannedAt: string;
@@ -258,7 +283,9 @@ export interface PlatformResultEntry {
 }
 
 export interface ProductSessionSummary {
-  avgRating: number | null;
+  lowestRating: number | null;
+  totalScanned: number;
+  totalLowRated: number;
   totalReviews: number;
   platformsScannedCount: number;
   lowRatingPlatforms: PlatformCode[];
@@ -267,6 +294,7 @@ export interface ProductSessionSummary {
   lastUpdated: string;
   keyFindings: string;
   complaintBreakdown: { issue: string; count: number; percentage: number }[];
+  avgRating?: number | null;
 }
 
 export interface ProductSession {

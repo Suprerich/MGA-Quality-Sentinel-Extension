@@ -190,14 +190,18 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
                         <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-[#F2F2F7] dark:bg-[#2C2C2E] text-[#1D1D1F] dark:text-[#F5F5F7]">
                           {plats.length} {language === 'en' ? 'platform(s)' : '个平台'}
                         </span>
-                        {record.summary?.avgRating !== null && record.summary?.avgRating !== undefined && (
-                          <span className="text-[11px] font-bold text-amber-500 font-mono">
-                            {record.summary.avgRating}★
+                        {record.summary?.lowestRating !== null && record.summary?.lowestRating !== undefined ? (
+                          <span className="text-[11px] font-bold text-[#FF3B30] font-mono">
+                            {language === 'en' ? 'Lowest' : '最低'}: {record.summary.lowestRating}★
+                          </span>
+                        ) : (
+                          <span className="text-[11px] font-semibold text-[#34C759]">
+                            {language === 'en' ? 'Compliant' : '合格'}
                           </span>
                         )}
                       </div>
                       <div className="text-[11px] text-[#8E8E93] font-mono">
-                        {record.updatedAt || record.startedAt} · {record.summary?.totalReviews.toLocaleString() || 0} reviews
+                        {record.updatedAt || record.startedAt} · {record.summary?.totalScanned || 0} {language === 'en' ? 'scanned items' : '个已扫商品'} · {record.summary?.totalLowRated || 0} {language === 'en' ? 'below threshold' : '个低分'}
                       </div>
                     </div>
 
@@ -295,10 +299,12 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
       {/* 2. Current Product KPI Overview */}
       <KpiOverview
         watchlistCount={watchlistCount}
-        lowRatingCount={summary?.lowRatingPlatforms.length || 0}
+        lowRatingCount={summary?.totalLowRated ?? 0}
         platformsCount={completedPlats.length}
         alertCount={alertGroups.length}
         threshold={threshold}
+        lowestRating={summary?.lowestRating ?? null}
+        totalScanned={summary?.totalScanned ?? 0}
         language={language}
         onFilterAlerts={() => onNavigateSection('search-scan')}
         onFilterLowRating={() => onNavigateSection('search-scan')}
@@ -337,16 +343,17 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
             </button>
           </div>
 
-          {/* Matrix Table with 7 platforms */}
+          {/* Matrix Table with 7 platforms (Requirement 5 & 6) */}
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="border-b border-[#E5E5EA] dark:border-[#2C2C2E] text-[11px] font-semibold text-[#8E8E93]">
                   <th className="py-2.5 px-3">{language === 'en' ? 'Monitored Channel' : '监控渠道'}</th>
                   <th className="py-2.5 px-3">{language === 'en' ? 'Status' : '状态'}</th>
-                  <th className="py-2.5 px-3 text-right">{language === 'en' ? 'Rating' : '评分'}</th>
-                  <th className="py-2.5 px-3 text-right">{language === 'en' ? 'Reviews' : '评论数'}</th>
-                  <th className="py-2.5 px-3 text-right">{language === 'en' ? 'Quality Status' : '质检预警'}</th>
+                  <th className="py-2.5 px-3 text-right">{language === 'en' ? 'Total Scanned' : '扫描商品总数'}</th>
+                  <th className="py-2.5 px-3 text-right">{language === 'en' ? `Below ${threshold.toFixed(1)}` : `低于${threshold.toFixed(1)}`}</th>
+                  <th className="py-2.5 px-3 text-right">{language === 'en' ? 'Lowest Rating' : '最低评分'}</th>
+                  <th className="py-2.5 px-3 text-right">{language === 'en' ? 'Query Time' : '查询时间'}</th>
                   <th className="py-2.5 px-3 text-right">{language === 'en' ? 'Actions' : '操作'}</th>
                 </tr>
               </thead>
@@ -354,6 +361,12 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
                 {PLAT_ORDER.map((pCode) => {
                   const res = currentSession.platformResults[pCode];
                   const isScanned = !!res;
+                  const total = res?.totalScanned ?? (res?.products?.length ?? 0);
+                  const lowCount = res?.lowRatedCount ?? (res?.lowRatedItems?.length ?? 0);
+                  const lowest = res?.lowestRating ?? null;
+                  const queryTime = res?.scannedAt
+                    ? new Date(res.scannedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    : '';
 
                   return (
                     <tr
@@ -374,32 +387,37 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
                           </span>
                         )}
                       </td>
-                      <td className="py-3 px-3 text-right font-mono font-bold">
-                        {isScanned && typeof res.rating === 'number' ? (
-                          <span className={res.rating < threshold ? 'text-[#FF3B30]' : 'text-emerald-600 dark:text-emerald-400'}>
-                            {res.rating.toFixed(1)}★
+                      <td className="py-3 px-3 text-right font-mono">
+                        {isScanned ? (
+                          <span className="font-semibold text-neutral-800 dark:text-neutral-200">
+                            {total} {language === 'en' ? 'items' : '个商品'}
                           </span>
+                        ) : (
+                          <span className="text-[#8E8E93]">—</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-3 text-right font-mono">
+                        {isScanned ? (
+                          <span className={lowCount > 0 ? 'text-[#FF3B30] font-bold' : 'text-emerald-600 dark:text-emerald-400 font-semibold'}>
+                            {lowCount} {language === 'en' ? 'items' : '个'}
+                          </span>
+                        ) : (
+                          <span className="text-[#8E8E93]">—</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-3 text-right font-mono font-bold">
+                        {isScanned && lowest != null ? (
+                          <span className={lowest < threshold ? 'text-[#FF3B30]' : 'text-emerald-600 dark:text-emerald-400'}>
+                            {lowest.toFixed(1)}★
+                          </span>
+                        ) : isScanned ? (
+                          <span className="text-[#34C759] text-[11px] font-normal">{language === 'en' ? 'No Low Rating' : '无低分'}</span>
                         ) : (
                           <span className="text-[#8E8E93] font-normal">—</span>
                         )}
                       </td>
-                      <td className="py-3 px-3 text-right font-mono text-[#8E8E93]">
-                        {isScanned && res.reviewCount != null ? res.reviewCount.toLocaleString() : '—'}
-                      </td>
-                      <td className="py-3 px-3 text-right">
-                        {isScanned ? (
-                          <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                              res.alertStatus === 'ALERT'
-                                ? 'bg-[#FF3B30]/10 text-[#FF3B30]'
-                                : 'bg-[#34C759]/10 text-[#34C759]'
-                            }`}
-                          >
-                            {res.alertStatus}
-                          </span>
-                        ) : (
-                          <span className="text-[10px] text-[#8E8E93]">—</span>
-                        )}
+                      <td className="py-3 px-3 text-right text-[11px] font-mono text-[#8E8E93]">
+                        {queryTime || '—'}
                       </td>
                       <td className="py-3 px-3 text-right">
                         {isScanned ? (
@@ -462,7 +480,7 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
                         {p.productName}
                       </div>
                       <div className="text-[11px] text-[#8E8E93] font-mono">
-                        {pCount} platforms · {p.summary?.avgRating ? `${p.summary.avgRating}★` : ''}
+                        {pCount} platforms · {p.summary?.lowestRating != null ? `Lowest: ${p.summary.lowestRating}★` : (p.summary?.totalScanned ? `${p.summary.totalScanned} scanned` : '')}
                       </div>
                     </div>
 

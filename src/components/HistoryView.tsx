@@ -110,9 +110,9 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
         return countB - countA;
       }
       if (sortOption === 'rating') {
-        const rateA = a.summary?.avgRating ?? -1;
-        const rateB = b.summary?.avgRating ?? -1;
-        return rateB - rateA;
+        const rateA = a.summary?.lowestRating ?? 99;
+        const rateB = b.summary?.lowestRating ?? 99;
+        return rateA - rateB; // Lowest rating first
       }
       return 0;
     });
@@ -383,18 +383,24 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                     </div>
                   </div>
 
-                  {/* Platforms Status Matrix Badges (All 7 Channels) */}
+                  {/* Platforms Status Matrix Badges (All 7 Channels - Requirement 5) */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 pt-1">
                     {PLAT_ORDER.map((pCode) => {
                       const res = record.platformResults?.[pCode];
                       const isScanned = !!res;
+                      const total = res?.totalScanned ?? (res?.products?.length ?? 0);
+                      const lowCount = res?.lowRatedCount ?? (res?.lowRatedItems?.length ?? 0);
+                      const lowest = res?.lowestRating ?? null;
+                      const queryTime = res?.scannedAt
+                        ? new Date(res.scannedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        : '';
 
                       return (
                         <div
                           key={pCode}
                           className={`p-2.5 rounded-xl border text-xs flex flex-col justify-between transition-colors ${
                             isScanned
-                              ? res.alertStatus === 'ALERT'
+                              ? lowCount > 0
                                 ? 'border-[#FF3B30]/30 bg-[#FF3B30]/5 text-[#FF3B30]'
                                 : 'border-emerald-500/30 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400'
                               : 'border-neutral-200 dark:border-neutral-800 bg-[#F2F2F7]/60 dark:bg-[#2C2C2E]/40 text-[#8E8E93]'
@@ -418,18 +424,34 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                             )}
                           </div>
 
-                          <div className="mt-1 flex items-baseline justify-between">
+                          <div className="mt-1.5 space-y-0.5 text-[10px] font-mono leading-tight">
                             {isScanned ? (
                               <>
-                                <span className={`font-bold text-xs font-mono ${typeof res.rating === 'number' ? '' : 'text-[#8E8E93]'}`}>
-                                  {typeof res.rating === 'number' ? `${res.rating.toFixed(1)}★` : (language === 'en' ? 'Not acquired' : '未获取')}
-                                </span>
-                                <span className="text-[10px] font-mono opacity-80">
-                                  {typeof res.reviewCount === 'number' ? `${res.reviewCount} revs` : ''}
-                                </span>
+                                <div className="text-neutral-700 dark:text-neutral-300">
+                                  {language === 'en' ? 'Scanned' : '扫描'}：<b>{total}</b> {language === 'en' ? 'items' : '个商品'}
+                                </div>
+                                <div className={lowCount > 0 ? 'text-[#FF3B30] font-bold' : 'text-[#34C759]'}>
+                                  {language === 'en' ? `< ${res.threshold || 3.5}` : `低于${res.threshold || 3.5}`}：<b>{lowCount}</b> {language === 'en' ? 'items' : '个'}
+                                </div>
+                                <div className="font-bold">
+                                  {lowest != null ? (
+                                    <span className="text-[#FF3B30]">
+                                      {language === 'en' ? 'Lowest' : '最低评分'}：{lowest.toFixed(1)}★
+                                    </span>
+                                  ) : (
+                                    <span className="text-[#34C759] font-normal">
+                                      {language === 'en' ? 'No Low Rating' : '无低分'}
+                                    </span>
+                                  )}
+                                </div>
+                                {queryTime && (
+                                  <div className="text-[#8E8E93] text-[9px] pt-0.5">
+                                    {queryTime}
+                                  </div>
+                                )}
                               </>
                             ) : (
-                              <div className="flex items-center justify-between w-full">
+                              <div className="flex items-center justify-between w-full py-1">
                                 <span className="text-[11px] text-[#8E8E93]">
                                   {t.statusNotScanned || '未查询'}
                                 </span>
@@ -447,100 +469,153 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                     })}
                   </div>
 
-                  {/* Summary Bar: Avg Rating, Total Reviews, Key Findings */}
+                  {/* Summary Bar: Lowest Rating, Total Scanned, Low-Rated Items (No Average Rating) */}
                   {record.summary && (
                     <div className="pt-2 border-t border-[#E5E5EA] dark:border-[#2C2C2E] flex flex-wrap items-center justify-between gap-3 text-xs">
                       <div className="flex flex-wrap items-center gap-4">
                         <div className="flex items-center gap-1.5 font-medium">
-                          <span className="text-[#8E8E93]">{language === 'en' ? 'Average Rating:' : '多平台平均评分：'}</span>
-                          <span className="font-bold text-[#1D1D1F] dark:text-[#F5F5F7] font-mono">
-                            {record.summary.avgRating !== null ? `${record.summary.avgRating}★` : (language === 'en' ? 'N/A' : '暂无评分')}
+                          <span className="text-[#8E8E93]">{language === 'en' ? 'Lowest Rating:' : '全网最低评分：'}</span>
+                          <span className="font-bold font-mono">
+                            {record.summary.lowestRating !== null ? (
+                              <span className="text-[#FF3B30]">{record.summary.lowestRating}★</span>
+                            ) : (
+                              <span className="text-[#34C759]">{language === 'en' ? 'No items < threshold' : '未发现低于警戒值商品'}</span>
+                            )}
                           </span>
                         </div>
 
                         <div className="flex items-center gap-1.5 font-medium">
-                          <span className="text-[#8E8E93]">{language === 'en' ? 'Total Customer Reviews:' : '总抓取评论数：'}</span>
+                          <span className="text-[#8E8E93]">{language === 'en' ? 'Total Scanned:' : '扫描商品总数：'}</span>
                           <span className="font-bold text-[#1D1D1F] dark:text-[#F5F5F7] font-mono">
-                            {record.summary.totalReviews.toLocaleString()}
+                            {record.summary.totalScanned || 0} {language === 'en' ? 'items' : '个商品'}
                           </span>
                         </div>
 
-                        {record.summary.lowRatingPlatforms.length > 0 && (
-                          <div className="flex items-center gap-1 text-[#FF3B30] font-semibold">
-                            <AlertTriangle className="h-3.5 w-3.5" />
-                            <span>
-                              {record.summary.lowRatingPlatforms.length} {language === 'en' ? 'platform(s) below threshold' : '个平台低于警戒阈值'}
-                            </span>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-1.5 font-medium">
+                          <span className="text-[#8E8E93]">{language === 'en' ? 'Below Threshold:' : '低于警戒值商品：'}</span>
+                          <span className={`font-bold font-mono ${(record.summary.totalLowRated || 0) > 0 ? 'text-[#FF3B30]' : 'text-[#34C759]'}`}>
+                            {record.summary.totalLowRated || 0} {language === 'en' ? 'items' : '个'}
+                          </span>
+                        </div>
                       </div>
 
                       <button
                         onClick={() => toggleExpand(record.productId)}
                         className="text-xs font-semibold text-[#007AFF] hover:underline flex items-center gap-1 cursor-pointer"
                       >
-                        <span>{isExpanded ? (language === 'en' ? 'Hide Details' : '收起详细') : (language === 'en' ? 'View Channel Trace & Findings' : '查看溯源信息与缺陷结论')}</span>
+                        <span>{isExpanded ? (language === 'en' ? 'Hide Details' : '收起详细') : (language === 'en' ? 'View Low-Rated Items & Findings' : '展开低分商品列表与质量结论')}</span>
                         {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                       </button>
                     </div>
                   )}
 
-                  {/* Expandable Key Findings, Channel Trace, & Complaints (Requirement 8) */}
+                  {/* Expandable Low-Rated Items List & Key Findings (Requirement 8) */}
                   {isExpanded && record.summary && (
-                    <div className="mt-3 p-4 rounded-xl bg-[#F2F2F7]/70 dark:bg-[#2C2C2E]/50 space-y-3.5 text-xs border border-neutral-200/50 dark:border-neutral-700/50 animate-fade-in">
-                      {/* Channel Traceability Matrix (Requirement 8: sourceUrl, tabId, scannedAt) */}
+                    <div className="mt-3 p-4 rounded-xl bg-[#F2F2F7]/70 dark:bg-[#2C2C2E]/50 space-y-4 text-xs border border-neutral-200/50 dark:border-neutral-700/50 animate-fade-in">
+                      {/* Section 1: Low-Rated Items Table */}
                       <div>
-                        <span className="font-semibold text-[#1D1D1F] dark:text-[#F5F5F7] block mb-1.5">
-                          {language === 'en' ? 'Channel Verification & Source Traceability:' : '各平台抓取来源与页面追溯：'}
-                        </span>
-                        <div className="space-y-1.5">
-                          {completedPlats.map((pCode) => {
-                            const entry = record.platformResults[pCode];
-                            if (!entry) return null;
-                            const srcUrl = entry.sourceUrl || entry.url;
-                            return (
-                              <div
-                                key={pCode}
-                                className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 p-2 rounded-lg bg-white dark:bg-[#1C1C1E] border border-neutral-200 dark:border-neutral-700 text-[11px]"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <span className="font-bold text-[#007AFF]">{PLAT_LABEL[pCode]}</span>
-                                  <span className="font-mono text-neutral-700 dark:text-neutral-300">
-                                    {typeof entry.rating === 'number' ? `${entry.rating}★` : (language === 'en' ? 'Not acquired' : '未获取')}
-                                    {typeof entry.reviewCount === 'number' ? ` (${entry.reviewCount} revs)` : ''}
-                                  </span>
-                                  {entry.tabId != null && (
-                                    <span className="px-1.5 py-0.2 rounded bg-neutral-100 dark:bg-neutral-800 text-[10px] text-neutral-500 font-mono">
-                                      Tab #{entry.tabId}
-                                    </span>
-                                  )}
-                                  <span className="text-[10px] text-neutral-400">
-                                    {entry.scannedAt ? new Date(entry.scannedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-                                  </span>
-                                </div>
-                                {srcUrl && (
-                                  <a
-                                    href={srcUrl}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="text-[#007AFF] hover:underline flex items-center gap-1 font-mono text-[10px] truncate max-w-xs"
-                                    title={srcUrl}
-                                  >
-                                    <span className="truncate">{srcUrl.replace(/^https?:\/\/(www\.)?/, '').slice(0, 45)}...</span>
-                                    <ExternalLink className="h-3 w-3 shrink-0" />
-                                  </a>
-                                )}
-                              </div>
-                            );
-                          })}
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-bold text-[#1D1D1F] dark:text-[#F5F5F7] flex items-center gap-1.5">
+                            <AlertTriangle className="h-4 w-4 text-[#FF3B30]" />
+                            <span>{language === 'en' ? 'Low-Rated Items Details (< Threshold):' : '低于警戒值商品详细列表（真实数据逐一核对）：'}</span>
+                          </span>
+                          <span className="text-[11px] text-[#8E8E93]">
+                            {completedPlats.flatMap((p) => record.platformResults[p]?.lowRatedItems || []).length} {language === 'en' ? 'items found' : '个低分商品'}
+                          </span>
                         </div>
+
+                        {completedPlats.flatMap((p) => record.platformResults[p]?.lowRatedItems || []).length === 0 ? (
+                          <div className="p-4 rounded-lg bg-white dark:bg-[#1C1C1E] border border-neutral-200 dark:border-neutral-700 text-center text-[#34C759] font-medium">
+                            {language === 'en' ? 'No items below threshold detected in this product history snapshot.' : '未发现低于警戒值的商品，所有已扫描商品评分均达到或高于警戒基准。'}
+                          </div>
+                        ) : (
+                          <div className="overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-[#1C1C1E]">
+                            <table className="w-full text-left border-collapse text-xs">
+                              <thead>
+                                <tr className="border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-[10px] font-semibold text-[#8E8E93] uppercase">
+                                  <th className="py-2.5 px-3">{language === 'en' ? 'Image' : '商品图片'}</th>
+                                  <th className="py-2.5 px-3">{language === 'en' ? 'Product Title' : '商品标题'}</th>
+                                  <th className="py-2.5 px-2.5">{language === 'en' ? 'Price' : '价格'}</th>
+                                  <th className="py-2.5 px-2.5">{language === 'en' ? 'Channel' : '渠道'}</th>
+                                  <th className="py-2.5 px-2.5">{language === 'en' ? 'SKU / Identifiers' : '商品标识'}</th>
+                                  <th className="py-2.5 px-2.5 text-right">{language === 'en' ? 'Rating' : '评分'}</th>
+                                  <th className="py-2.5 px-2.5 text-right">{language === 'en' ? 'Reviews' : '评论数'}</th>
+                                  <th className="py-2.5 px-3 text-right">{language === 'en' ? 'Action' : '操作'}</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
+                                {completedPlats.flatMap((pCode) =>
+                                  (record.platformResults[pCode]?.lowRatedItems || []).map((it) => (
+                                    <tr key={it.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/50">
+                                      <td className="py-2 px-3 whitespace-nowrap">
+                                        {it.imageUrl ? (
+                                          <img
+                                            src={it.imageUrl}
+                                            alt={it.productName}
+                                            className="h-10 w-10 object-contain rounded border border-neutral-200 dark:border-neutral-700 bg-white"
+                                            onError={(e) => {
+                                              (e.target as HTMLElement).style.display = 'none';
+                                            }}
+                                          />
+                                        ) : (
+                                          <div className="h-10 w-10 rounded bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-[10px] text-neutral-400">
+                                            MGA
+                                          </div>
+                                        )}
+                                      </td>
+                                      <td className="py-2 px-3 max-w-xs">
+                                        <div className="font-semibold text-[#1D1D1F] dark:text-[#F5F5F7] line-clamp-1">
+                                          {it.productName}
+                                        </div>
+                                        <div className="text-[10px] text-[#8E8E93] truncate">
+                                          {it.mainIssue || 'Quality review'}
+                                        </div>
+                                      </td>
+                                      <td className="py-2 px-2.5 font-mono text-neutral-700 dark:text-neutral-300 whitespace-nowrap">
+                                        {it.price || '—'}
+                                      </td>
+                                      <td className="py-2 px-2.5 whitespace-nowrap">
+                                        <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#F2F2F7] dark:bg-[#2C2C2E]">
+                                          {PLAT_LABEL[pCode]}
+                                        </span>
+                                      </td>
+                                      <td className="py-2 px-2.5 font-mono text-[10px] text-[#8E8E93] whitespace-nowrap">
+                                        {it.upc ? `UPC: ${it.upc}` : it.sku ? `SKU: ${it.sku}` : '—'}
+                                      </td>
+                                      <td className="py-2 px-2.5 text-right font-mono font-bold text-[#FF3B30] whitespace-nowrap">
+                                        {it.rating}★
+                                      </td>
+                                      <td className="py-2 px-2.5 text-right font-mono text-neutral-600 dark:text-neutral-400 whitespace-nowrap">
+                                        {it.reviewCount != null ? `${it.reviewCount} ${language === 'en' ? 'revs' : '条'}` : '—'}
+                                      </td>
+                                      <td className="py-2 px-3 text-right whitespace-nowrap">
+                                        {it.productUrl && (
+                                          <a
+                                            href={it.productUrl}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-white bg-[#007AFF] hover:bg-[#0062CC] rounded-lg transition-colors shadow-2xs"
+                                          >
+                                            <span>{language === 'en' ? 'Open' : '打开商品页面'}</span>
+                                            <ExternalLink className="h-3 w-3" />
+                                          </a>
+                                        )}
+                                      </td>
+                                    </tr>
+                                  ))
+                                )}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
                       </div>
 
+                      {/* Section 2: Executive Findings & Quality Conclusions */}
                       <div>
                         <span className="font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
-                          {language === 'en' ? 'Executive Key Findings:' : '跨平台综合质量结论：'}
+                          {language === 'en' ? 'Executive Quality Conclusions:' : '跨平台综合质量结论：'}
                         </span>
-                        <p className="text-neutral-600 dark:text-neutral-300 mt-0.5 leading-relaxed">
+                        <p className="text-neutral-600 dark:text-neutral-300 mt-1 leading-relaxed bg-white dark:bg-[#1C1C1E] p-3 rounded-lg border border-neutral-200 dark:border-neutral-700">
                           {record.summary.keyFindings}
                         </p>
                       </div>
@@ -548,7 +623,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                       {record.summary.complaintBreakdown.length > 0 && (
                         <div>
                           <span className="font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
-                            {language === 'en' ? 'Complaint Category Breakdown:' : '消费者差评分类分布：'}
+                            {language === 'en' ? 'Customer Defect Breakdown:' : '消费者差评分类分布：'}
                           </span>
                           <div className="flex flex-wrap gap-2 mt-1.5">
                             {record.summary.complaintBreakdown.map((item) => (
