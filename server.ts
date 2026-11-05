@@ -21,6 +21,22 @@ async function startServer() {
     });
   });
 
+  // Server-side Retail Scrape Proxy for Web Mode (Strictly no fake fallback data)
+  app.get('/api/retail-scrape', async (req, res) => {
+    const platform = String(req.query.platform || 'target');
+    const keyword = String(req.query.keyword || '').trim();
+
+    if (!keyword) {
+      return res.status(400).json({ success: false, error: 'Keyword required' });
+    }
+
+    // Direct proxy informs user clearly when retailer anti-bot blocks cloud requests
+    return res.json({
+      success: false,
+      error: `Web端无法直接跨域穿透零售商的反爬虫策略。请点击右上角“Install Extension”在 Chrome 或 Microsoft Edge 中加载插件，在真实浏览器会话中执行原生抓取，或使用扩展侧边栏的“Scan Current Page”直接抓取商品页。`
+    });
+  });
+
   // Direct Extension Zip Download Route
   app.get(['/api/download-extension', '/mga-sentinel-extension.zip'], (_req, res) => {
     const candidates = [

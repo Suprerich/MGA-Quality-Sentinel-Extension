@@ -16,6 +16,17 @@ async function startServer() {
       timestamp: (/* @__PURE__ */ new Date()).toISOString()
     });
   });
+  app.get("/api/retail-scrape", async (req, res) => {
+    const platform = String(req.query.platform || "target");
+    const keyword = String(req.query.keyword || "").trim();
+    if (!keyword) {
+      return res.status(400).json({ success: false, error: "Keyword required" });
+    }
+    return res.json({
+      success: false,
+      error: `Web\u7AEF\u65E0\u6CD5\u76F4\u63A5\u8DE8\u57DF\u7A7F\u900F\u96F6\u552E\u5546\u7684\u53CD\u722C\u866B\u7B56\u7565\u3002\u8BF7\u70B9\u51FB\u53F3\u4E0A\u89D2\u201CInstall Extension\u201D\u5728 Chrome \u6216 Microsoft Edge \u4E2D\u52A0\u8F7D\u63D2\u4EF6\uFF0C\u5728\u771F\u5B9E\u6D4F\u89C8\u5668\u4F1A\u8BDD\u4E2D\u6267\u884C\u539F\u751F\u6293\u53D6\uFF0C\u6216\u4F7F\u7528\u6269\u5C55\u4FA7\u8FB9\u680F\u7684\u201CScan Current Page\u201D\u76F4\u63A5\u6293\u53D6\u5546\u54C1\u9875\u3002`
+    });
+  });
   app.get(["/api/download-extension", "/mga-sentinel-extension.zip"], (_req, res) => {
     const candidates = [
       path.join(__dirname, "dist", "mga-sentinel-extension.zip"),

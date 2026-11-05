@@ -35,7 +35,7 @@ import {
   SearchHistoryRecord
 } from '../types';
 import { getTranslation } from '../services/i18n';
-import { PLAT_LABEL, belowPlatforms } from '../services/summaryService';
+import { PLAT_ORDER, PLAT_LABEL, belowPlatforms } from '../services/summaryService';
 import { exportLowRatedExcel, exportFullCsv } from '../services/exportService';
 
 // Embedded child subviews for results
@@ -75,6 +75,10 @@ interface SearchScanViewProps {
   keywordSummary?: { keyword: string; count: number }[];
   lastScanTime: string;
 
+  // Session Management (Requirement 1, 2, 6, 7)
+  currentSession?: import('../types').ProductSession | null;
+  onNewProductSearch?: () => void;
+
   // Secondary actions
   onSelectGroup: (group: CrossPlatformGroup) => void;
   onCopyEmailTable: () => void;
@@ -107,6 +111,8 @@ export const SearchScanView: React.FC<SearchScanViewProps> = ({
   deepResults = [],
   keywordSummary = [],
   lastScanTime,
+  currentSession = null,
+  onNewProductSearch,
   onSelectGroup,
   onCopyEmailTable,
   onDeepAnalyzeLowRated,
@@ -141,6 +147,130 @@ export const SearchScanView: React.FC<SearchScanViewProps> = ({
           {t.resultsSubtitle}
         </p>
       </div>
+
+      {/* Active Product Session Banner (Requirement 1, 2, 4, 7) */}
+      {currentSession && Object.keys(currentSession.platformResults || {}).length > 0 && (
+        <div className="rounded-2xl border border-[#007AFF]/30 bg-gradient-to-r from-[#007AFF]/5 via-[#007AFF]/10 to-transparent p-5 dark:border-[#007AFF]/40 dark:from-[#007AFF]/10 dark:via-[#007AFF]/15 shadow-2xs space-y-3.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#007AFF] text-white">
+                  {language === 'en' ? 'Active Product Session' : '当前产品查询会话'}
+                </span>
+                <span className="text-sm font-bold text-[#1D1D1F] dark:text-[#F5F5F7]">
+                  {currentSession.productName}
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#8E8E93] font-mono">
+                {currentSession.identifiers?.upc && (
+                  <span className="bg-white/80 dark:bg-black/30 px-1.5 py-0.5 rounded border border-neutral-200 dark:border-neutral-700">
+                    UPC: {currentSession.identifiers.upc}
+                  </span>
+                )}
+                {currentSession.identifiers?.model && (
+                  <span className="bg-white/80 dark:bg-black/30 px-1.5 py-0.5 rounded border border-neutral-200 dark:border-neutral-700">
+                    Model: {currentSession.identifiers.model}
+                  </span>
+                )}
+                {currentSession.identifiers?.walmartNumber && (
+                  <span className="bg-white/80 dark:bg-black/30 px-1.5 py-0.5 rounded border border-neutral-200 dark:border-neutral-700">
+                    WM#: {currentSession.identifiers.walmartNumber}
+                  </span>
+                )}
+                {currentSession.identifiers?.amazonNumber && (
+                  <span className="bg-white/80 dark:bg-black/30 px-1.5 py-0.5 rounded border border-neutral-200 dark:border-neutral-700">
+                    ASIN: {currentSession.identifiers.amazonNumber}
+                  </span>
+                )}
+                {currentSession.identifiers?.targetNumber && (
+                  <span className="bg-white/80 dark:bg-black/30 px-1.5 py-0.5 rounded border border-neutral-200 dark:border-neutral-700">
+                    TCIN: {currentSession.identifiers.targetNumber}
+                  </span>
+                )}
+                {currentSession.identifiers?.costcoNumber && (
+                  <span className="bg-white/80 dark:bg-black/30 px-1.5 py-0.5 rounded border border-neutral-200 dark:border-neutral-700">
+                    Costco#: {currentSession.identifiers.costcoNumber}
+                  </span>
+                )}
+                <span>
+                  · {language === 'en' ? 'Accumulating cross-platform results' : '各平台数据持续累积中'}
+                </span>
+              </div>
+            </div>
+
+            {onNewProductSearch && (
+              <button
+                type="button"
+                onClick={onNewProductSearch}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-neutral-800 dark:text-neutral-100 bg-white dark:bg-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-700 border border-neutral-200 dark:border-neutral-700 rounded-xl transition-all shadow-2xs cursor-pointer self-start sm:self-center"
+              >
+                <span>+ {t.btnNewProductSearch}</span>
+              </button>
+            )}
+          </div>
+
+          {/* 7 Channels Status Strip */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 pt-1">
+            {PLAT_ORDER.map((pCode) => {
+              const res = currentSession.platformResults?.[pCode];
+              const isScanned = !!res;
+              const retailerKey = {
+                WMUS: 'walmart_us',
+                WMCA: 'walmart_ca',
+                AMZUS: 'amazon_us',
+                AMZCA: 'amazon_ca',
+                TARGET: 'target',
+                COSTCOUS: 'costco_us',
+                COSTCOCA: 'costco_ca'
+              }[pCode];
+
+              return (
+                <div
+                  key={pCode}
+                  className={`p-2 rounded-xl border text-xs flex flex-col justify-between transition-all ${
+                    isScanned
+                      ? res.alertStatus === 'ALERT'
+                        ? 'border-[#FF3B30]/40 bg-[#FF3B30]/10 text-[#FF3B30]'
+                        : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 font-medium'
+                      : 'border-neutral-200 dark:border-neutral-800 bg-white/70 dark:bg-[#1C1C1E]/70 text-[#8E8E93]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-[11px] truncate">
+                      {PLAT_LABEL[pCode]}
+                    </span>
+                    {isScanned ? (
+                      <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">✓</span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (retailerKey) onPlatformChange(retailerKey);
+                        }}
+                        className="text-[10px] text-[#007AFF] font-bold hover:underline"
+                        title={language === 'en' ? 'Select this channel to scan' : '选择此平台并查询'}
+                      >
+                        + {language === 'en' ? 'Scan' : '查询'}
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="mt-1 font-mono text-[11px]">
+                    {isScanned ? (
+                      <div className="flex items-center justify-between">
+                        <b>{typeof res.rating === 'number' ? `${res.rating.toFixed(1)}★` : (language === 'en' ? 'Not acquired' : '未获取')}</b>
+                        <span className="opacity-75">{typeof res.reviewCount === 'number' ? `(${res.reviewCount})` : ''}</span>
+                      </div>
+                    ) : (
+                      <span className="text-[#8E8E93] text-[10px]">{t.statusNotScanned || '未查询'}</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* 2. Primary Query Formulation Card */}
       <div className="rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] p-6 shadow-2xs dark:border-[#2C2C2E] dark:bg-[#1C1C1E] transition-all">

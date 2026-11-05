@@ -262,3 +262,53 @@ export async function saveWatchlist(items: WatchlistItem[]): Promise<void> {
     // ignore
   }
 }
+
+/**
+ * Finds the product item from a search result list that best matches the target search query.
+ * Solves the issue of search pages returning multiple items (e.g. Target having Elmer's glue + Slime Life).
+ */
+export function findBestMatchingProduct(
+  products: import('../types').ProductItem[],
+  query: string
+): import('../types').ProductItem | null {
+  if (!products || products.length === 0) return null;
+  if (products.length === 1) return products[0];
+
+  const qTokens = tokens(query);
+  let bestItem: import('../types').ProductItem | null = null;
+  let highestScore = -1;
+
+  for (const item of products) {
+    const itemTokens = tokens(item.name || '');
+    let score = overlap(qTokens, itemTokens);
+
+    // Give bonus if item name directly contains distinctive words from query
+    for (const t of qTokens) {
+      if (t.length >= 3 && (item.name || '').toLowerCase().includes(t)) {
+        score += 0.35;
+      }
+    }
+
+    // Heavy bonus if specific identifiers match (UPC, TCIN, ASIN, WM#)
+    const normQ = normId(query);
+    if (normQ) {
+      if (normId(item.upcNumber) === normQ) score += 3.0;
+      if (normId(item.targetNumber) === normQ) score += 3.0;
+      if (normId(item.amazonNumber) === normQ) score += 3.0;
+      if (normId(item.walmartNumber) === normQ) score += 3.0;
+      if (normId(item.costcoNumber) === normQ) score += 3.0;
+      if (normId(item.modelNumber) === normQ) score += 2.0;
+    }
+
+    if (seriesConflict(qTokens, itemTokens)) {
+      score -= 0.5;
+    }
+
+    if (score > highestScore) {
+      highestScore = score;
+      bestItem = item;
+    }
+  }
+
+  return bestItem || products[0];
+}

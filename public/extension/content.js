@@ -41,13 +41,27 @@ function productName(){
 /* ===== SECTION 2: Parsers ===== */
 function parseRating(text){
   if(!text)return null;const s=String(text);
-  const ps=[/(\d(?:\.\d{1,2})?)\s*out\s*of\s*5\s*stars?/i,/Rated\s*(\d(?:\.\d{1,2})?)\s*out\s*of\s*5/i,/Average\s*rating[:\s]*\s*(\d(?:\.\d{1,2})?)\s*\/?\s*5?/i,/^\s*(\d(?:\.\d{1,2})?)\s*\/\s*5\s*$/,/(\d(?:\.\d{1,2})?)\s*out\s*of\s*5(?!\s*\d)/i];
+  const ps=[
+    /(\d(?:\.\d{1,2})?)\s*out\s*of\s*5\s*stars?/i,
+    /Rated\s*(\d(?:\.\d{1,2})?)\s*out\s*of\s*5/i,
+    /Average\s*rating[:\s]*\s*(\d(?:\.\d{1,2})?)\s*\/?\s*5?/i,
+    /^\s*(\d(?:\.\d{1,2})?)\s*\/\s*5\s*$/,
+    /(\d(?:\.\d{1,2})?)\s*out\s*of\s*5(?!\s*\d)/i,
+    /(\d(?:\.\d{1,2})?)\s*[★☆⭐*]/,
+    /(\d(?:\.\d{1,2})?)\s*stars?/i,
+    /(\d(?:\.\d{1,2})?)\s*\(\s*\d+\s*(?:ratings?|reviews?)?\s*\)/i
+  ];
   for(const p of ps){const m=s.match(p);if(m){const n=parseFloat(m[1]);if(!isNaN(n)&&n>=0&&n<=5)return n}}
   return null;
 }
 function parseReviewCount(text){
   if(!text)return null;const s=String(text);
-  const ps=[/([\d,]+)\s*(?:customer\s*)?(?:ratings|reviews)/i,/\(\s*([\d,]+)\s*\)/,/([\d,]+)\s*global\s*ratings/i];
+  const ps=[
+    /([\d,]+)\s*(?:customer\s*)?(?:ratings|reviews)/i,
+    /\(\s*([\d,]+)\s*\)/,
+    /([\d,]+)\s*global\s*ratings/i,
+    /\b([\d,]+)\s*(?:ratings|reviews)\b/i
+  ];
   for(const p of ps){const m=s.match(p);if(m){const n=parseInt(m[1].replace(/,/g,''),10);if(!isNaN(n)&&n>=0)return n}}
   return null;
 }
@@ -444,10 +458,23 @@ function extractFromContainer(container,url,threshold,analyzeVisibleText,originK
 }
 function scanSearchPage(threshold,analyzeVisibleText,originKeyword){
   const checkedAt=new Date().toISOString(),sourceSite=location.hostname,map=new Map(),links=getProductLinks();
-  for(const link of links){const url=absUrl(link.getAttribute('href')).split('?')[0];if(!url||map.has(url))continue;
-    const container=link.closest('[data-item-id],[data-testid*=item],[data-automation-id*=product],[data-component-type=s-search-result],li,article')||link.closest('div')||document.body;
-    const result=extractFromContainer(container,url,threshold,analyzeVisibleText,originKeyword);result.name=bestName(container,link);result.sourceSite=sourceSite;result.checkedAt=checkedAt;map.set(url,result)}
-  if(map.size===0&&isProductDetailPage()){const result=extractFromContainer(document.body,location.href.split('?')[0],threshold,analyzeVisibleText,originKeyword);result.name=cleanText(document.querySelector('#productTitle,h1,[data-test=product-title]')?.textContent)||cleanText(document.title);result.sourceSite=sourceSite;result.checkedAt=checkedAt;map.set(result.url,result)}
+  for(const link of links){
+    const url=absUrl(link.getAttribute('href')).split('?')[0];
+    if(!url||map.has(url))continue;
+    const container=link.closest('[data-test*="ProductCardWrapper"],[data-test*="product-card"],[data-test*="product-grid-item"],[data-item-id],[data-testid*=item],[data-automation-id*=product],[data-component-type="s-search-result"],.product-tile,.product-item,.col-xs-6,.col-lg-3,li,article')||link.parentElement?.parentElement?.parentElement||link.parentElement?.parentElement||link.parentElement||document.body;
+    const result=extractFromContainer(container,url,threshold,analyzeVisibleText,originKeyword);
+    result.name=bestName(container,link);
+    result.sourceSite=sourceSite;
+    result.checkedAt=checkedAt;
+    map.set(url,result);
+  }
+  if(map.size===0&&isProductDetailPage()){
+    const result=extractFromContainer(document.body,location.href.split('?')[0],threshold,analyzeVisibleText,originKeyword);
+    result.name=cleanText(document.querySelector('#productTitle,h1,[data-test=product-title]')?.textContent)||cleanText(document.title);
+    result.sourceSite=sourceSite;
+    result.checkedAt=checkedAt;
+    map.set(result.url,result);
+  }
   return Array.from(map.values()).filter(r=>r.name||r.url);
 }
 function scanDetailPage(threshold,analyzeVisibleText,originKeyword){
@@ -477,9 +504,32 @@ function scanCombined(threshold,analyzeVisibleText,originKeyword){
   return{mode:'search',products:scanSearchPage(threshold,analyzeVisibleText,originKeyword),meta:{},complaints:[],keywordSummary:[]};
 }
 
-/* ===== SECTION 10: Message Listener ===== */
+/* ===== SECTION 10: Platform Domain Validation & Message Listener ===== */
+function checkPlatformDomainMatch(expectedPlatform){
+  if(!expectedPlatform)return{ok:true};
+  const h=location.hostname.toLowerCase();
+  const ep=String(expectedPlatform).toLowerCase();
+  let expectedDomain='',expectedName='';
+  if(ep.includes('walmart_ca')||ep.includes('wmca')){expectedDomain='walmart.ca';expectedName='Walmart CA';}
+  else if(ep.includes('walmart')){expectedDomain='walmart.com';expectedName='Walmart US';}
+  else if(ep.includes('amazon_ca')||ep.includes('amzca')){expectedDomain='amazon.ca';expectedName='Amazon CA';}
+  else if(ep.includes('amazon')){expectedDomain='amazon.com';expectedName='Amazon US';}
+  else if(ep.includes('target')){expectedDomain='target.com';expectedName='Target';}
+  else if(ep.includes('costco_ca')||ep.includes('costcoca')){expectedDomain='costco.ca';expectedName='Costco CA';}
+  else if(ep.includes('costco')){expectedDomain='costco.com';expectedName='Costco US';}
+  if(expectedDomain&&!h.includes(expectedDomain)){
+    return{ok:false,error:'当前页面不是['+expectedName+']，请确认是否选择了正确的平台标签。'};
+  }
+  return{ok:true};
+}
+
 chrome.runtime.onMessage.addListener((msg,sender,sendResponse)=>{
   if(msg?.type==='QC_COMBINED_SCAN'){
+    const domainCheck=checkPlatformDomainMatch(msg.expectedPlatform);
+    if(!domainCheck.ok){
+      sendResponse({error:domainCheck.error,products:[],complaints:[]});
+      return true;
+    }
     const threshold=Number(msg.threshold??4.0),analyzeVisibleText=msg.analyzeVisibleText!==false,originKeyword=msg.originKeyword||'China';
     sendResponse(scanCombined(threshold,analyzeVisibleText,originKeyword));
   }

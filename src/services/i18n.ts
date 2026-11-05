@@ -21,12 +21,29 @@ export const TRANSLATIONS = {
     navSettings: 'Settings',
 
     // Header buttons
+    btnNewProductSearch: 'New Product Search',
     btnScanCurrent: 'Scan Current Page',
     btnSearchScan: 'Search & Scan',
     btnDeepAnalyze: 'Deep Analyze',
     btnRefresh: 'Refresh Dashboard',
     btnInstallExt: 'Install Extension',
     btnEmailTable: 'Email Table',
+
+    // New Product Search Confirmation Modal & Platform Status
+    confirmNewProductTitle: 'Start New Product Query?',
+    confirmNewProductDesc: 'The current product results will be saved to History, and the current workspace will be cleared.',
+    btnSaveAndStartNew: 'Save & Start New Query',
+    statusNotScanned: 'Not Scanned',
+    statusCompleted: 'Completed',
+    btnContinueNextPlatform: 'Continue Next Platform',
+    btnRescanPlatform: 'Re-scan Platform',
+    btnDeletePlatform: 'Delete Platform Data',
+    btnRestoreProduct: 'Restore to Workspace',
+    activeSessionTitle: 'Active Product Session',
+    activeSessionBadge: 'Active Product',
+    switchProductPrompt: 'Switching Product Session',
+    unqueriedPlatforms: 'Unqueried Platforms',
+    queriedPlatforms: 'Queried Platforms',
 
     // Language dropdown
     langSelect: 'Language',
@@ -252,12 +269,29 @@ export const TRANSLATIONS = {
     navSettings: '设置中心',
 
     // Header buttons
+    btnNewProductSearch: '查询新产品',
     btnScanCurrent: '扫描当前页面',
     btnSearchScan: '搜索并扫描',
     btnDeepAnalyze: '深度分析',
     btnRefresh: '刷新大盘',
     btnInstallExt: '安装扩展',
     btnEmailTable: '邮件表格',
+
+    // New Product Search Confirmation Modal & Platform Status
+    confirmNewProductTitle: '是否开始查询新产品？',
+    confirmNewProductDesc: '当前产品结果将保存到历史记录，并清空当前工作区。',
+    btnSaveAndStartNew: '保存并开始新查询',
+    statusNotScanned: '未查询',
+    statusCompleted: '已完成',
+    btnContinueNextPlatform: '继续查询未完成平台',
+    btnRescanPlatform: '重新扫描该平台',
+    btnDeletePlatform: '删除该平台数据',
+    btnRestoreProduct: '恢复到工作区',
+    activeSessionTitle: '当前产品查询会话',
+    activeSessionBadge: '当前产品会话',
+    switchProductPrompt: '切换查询产品确认',
+    unqueriedPlatforms: '未查询平台',
+    queriedPlatforms: '已查询平台',
 
     // Language dropdown
     langSelect: '语言',
@@ -483,12 +517,29 @@ export const TRANSLATIONS = {
     navSettings: '設定中心',
 
     // Header buttons
+    btnNewProductSearch: '查詢新產品',
     btnScanCurrent: '掃描目前頁面',
     btnSearchScan: '搜尋並掃描',
     btnDeepAnalyze: '深度分析',
     btnRefresh: '重新整理大盤',
     btnInstallExt: '安裝擴充功能',
     btnEmailTable: '郵件表格',
+
+    // New Product Search Confirmation Modal & Platform Status
+    confirmNewProductTitle: '是否開始查詢新產品？',
+    confirmNewProductDesc: '當前產品結果將保存到歷史記錄，並清空當前工作區。',
+    btnSaveAndStartNew: '保存並開始新查詢',
+    statusNotScanned: '未查詢',
+    statusCompleted: '已完成',
+    btnContinueNextPlatform: '繼續查詢未完成平台',
+    btnRescanPlatform: '重新掃描該平台',
+    btnDeletePlatform: '刪除該平台數據',
+    btnRestoreProduct: '恢復到工作區',
+    activeSessionTitle: '當前產品查詢會話',
+    activeSessionBadge: '當前產品會話',
+    switchProductPrompt: '切換查詢產品確認',
+    unqueriedPlatforms: '未查詢平台',
+    queriedPlatforms: '已查詢平台',
 
     // Language dropdown
     langSelect: '語言',

@@ -226,4 +226,63 @@ export interface ScanSettings {
   originKeyword: string;
 }
 
+export interface ProductIdentifiers {
+  upc?: string;
+  model?: string;
+  walmartNumber?: string;
+  amazonNumber?: string;
+  targetNumber?: string;
+  costcoNumber?: string;
+}
+
+export interface PlatformResultEntry {
+  platform: PlatformCode;
+  retailerId: RetailerId;
+  retailerName: string;
+  url: string;
+  sourceUrl?: string;
+  tabId?: number | null;
+  rating: number | null;
+  reviewCount: number | null;
+  productName?: string;
+  alertStatus: AlertStatus;
+  countryOfOrigin?: string;
+  products: ProductItem[];
+  complaints: Complaint[];
+  deepResults?: any[];
+  keywordSummary?: { keyword: string; count: number }[];
+  scannedAt: string;
+  queryKeyword?: string;
+  status: 'completed' | 'not_scanned' | 'failed';
+  error?: string;
+}
+
+export interface ProductSessionSummary {
+  avgRating: number | null;
+  totalReviews: number;
+  platformsScannedCount: number;
+  lowRatingPlatforms: PlatformCode[];
+  alertCount: number;
+  skuMatchStatus?: SkuValidationStatus;
+  lastUpdated: string;
+  keyFindings: string;
+  complaintBreakdown: { issue: string; count: number; percentage: number }[];
+}
+
+export interface ProductSession {
+  productId: string;
+  productName: string;
+  searchKeyword?: string;
+  identifiers: ProductIdentifiers;
+  startedAt: string;
+  updatedAt: string;
+  platformResults: Partial<Record<PlatformCode, PlatformResultEntry>>;
+  summary?: ProductSessionSummary;
+  complaints: Complaint[];
+  deepResults?: any[];
+  status: 'in_progress' | 'completed';
+}
+
+export type ProductHistoryRecord = ProductSession;
+
 

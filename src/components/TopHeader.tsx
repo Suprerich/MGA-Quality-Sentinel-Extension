@@ -11,7 +11,8 @@ import {
   Globe,
   Check,
   ChevronDown,
-  Loader2
+  Loader2,
+  Plus
 } from 'lucide-react';
 import { Language } from '../types';
 import { getTranslation } from '../services/i18n';
@@ -19,6 +20,7 @@ import { isExtensionRuntime } from '../services/realSearchScanService';
 
 interface TopHeaderProps {
   lastScanTime: string;
+  onNewProductSearch: () => void;
   onScanCurrentPage: () => void;
   onOpenSearchScan: () => void;
   onDeepAnalyze: () => void;
@@ -34,6 +36,7 @@ interface TopHeaderProps {
 
 export const TopHeader: React.FC<TopHeaderProps> = ({
   lastScanTime,
+  onNewProductSearch,
   onScanCurrentPage,
   onOpenSearchScan,
   onDeepAnalyze,
@@ -99,6 +102,16 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
 
         {/* Top Actions & Language Selector */}
         <div className="flex flex-wrap items-center gap-2">
+          {/* Action 0: New Product Search (Prominent) */}
+          <button
+            onClick={onNewProductSearch}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-100 rounded-lg transition-all shadow-2xs whitespace-nowrap"
+            title={t.btnNewProductSearch}
+          >
+            <Plus className="h-3.5 w-3.5" />
+            <span>{t.btnNewProductSearch}</span>
+          </button>
+
           {/* Action 1: Scan Current Page */}
           <button
             onClick={onScanCurrentPage}

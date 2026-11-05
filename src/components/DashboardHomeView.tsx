@@ -9,7 +9,12 @@ import {
   Clock,
   Sparkles,
   ArrowRight,
-  RotateCw
+  RotateCw,
+  Plus,
+  FolderOpen,
+  CheckCircle,
+  ShieldAlert,
+  Play
 } from 'lucide-react';
 import { KpiOverview } from './KpiOverview';
 import { AlertCenter } from './AlertCenter';
@@ -17,53 +22,91 @@ import { ExecutiveSummary } from './ExecutiveSummary';
 import {
   CrossPlatformGroup,
   ProductItem,
-  TrendDatabase,
   NavSection,
   Language,
-  SearchHistoryRecord
+  ProductSession,
+  PlatformCode
 } from '../types';
-import { PLAT_ORDER, belowPlatforms } from '../services/summaryService';
+import { PLAT_ORDER, PLAT_LABEL, belowPlatforms } from '../services/summaryService';
 import { getTranslation } from '../services/i18n';
 
 interface DashboardHomeViewProps {
-  groups: CrossPlatformGroup[];
-  products: ProductItem[];
-  trendDb: TrendDatabase;
+  currentSession: ProductSession | null;
+  productHistory: ProductSession[];
   watchlistCount: number;
   threshold: number;
-  searchHistory: SearchHistoryRecord[];
   language: Language;
   onThresholdChange: (newVal: number) => void;
+  onNewProductSearch: () => void;
   onSelectGroup: (group: CrossPlatformGroup) => void;
   onNavigateSection: (section: NavSection) => void;
   onCopyEmailTable: () => void;
-  onOpenHistoryRecord: (record: SearchHistoryRecord) => void;
+  onOpenProduct: (product: ProductSession) => void;
   onScanCurrentPage: () => void;
   isScanning: boolean;
 }
 
 export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
-  groups,
-  products,
-  trendDb,
+  currentSession,
+  productHistory,
   watchlistCount,
   threshold,
-  searchHistory,
   language,
   onThresholdChange,
+  onNewProductSearch,
   onSelectGroup,
   onNavigateSection,
   onCopyEmailTable,
-  onOpenHistoryRecord,
+  onOpenProduct,
   onScanCurrentPage,
   isScanning
 }) => {
   const t = getTranslation(language);
-  const alertGroups = groups.filter((g) => belowPlatforms(g, threshold).length > 0);
-  const lowRatingCount = products.filter((p) => p.rating !== null && p.rating < threshold).length;
 
-  // Case A: First time user or no data loaded yet (Requirement 4 & 14)
-  if (products.length === 0) {
+  const completedPlats = currentSession
+    ? (Object.keys(currentSession.platformResults || {}) as PlatformCode[])
+    : [];
+  const hasActiveSession = currentSession && completedPlats.length > 0;
+
+  // Build a synthetic single CrossPlatformGroup for current product
+  const currentGroup: CrossPlatformGroup | null = hasActiveSession
+    ? {
+        id: currentSession.productId,
+        name: currentSession.productName,
+        upc: currentSession.identifiers?.upc || '',
+        model: currentSession.identifiers?.model || '',
+        platforms: Object.fromEntries(
+          completedPlats.map((pCode) => {
+            const res = currentSession.platformResults[pCode];
+            return [
+              pCode,
+              {
+                rating: res?.rating ?? null,
+                count: res?.reviewCount ?? null,
+                url: res?.url || ''
+              }
+            ];
+          })
+        ),
+        complaints: currentSession.complaints || [],
+        _seen: {},
+        _probe: {
+          name: currentSession.productName,
+          upcNumber: currentSession.identifiers?.upc,
+          modelNumber: currentSession.identifiers?.model,
+          walmartNumber: currentSession.identifiers?.walmartNumber,
+          targetNumber: currentSession.identifiers?.targetNumber,
+          amazonNumber: currentSession.identifiers?.amazonNumber,
+          costcoNumber: currentSession.identifiers?.costcoNumber
+        }
+      }
+    : null;
+
+  const currentGroups: CrossPlatformGroup[] = currentGroup ? [currentGroup] : [];
+  const alertGroups = currentGroups.filter((g) => belowPlatforms(g, threshold).length > 0);
+
+  // Case A: No active product session currently loaded in workspace
+  if (!hasActiveSession) {
     return (
       <div className="space-y-6">
         {/* Welcome Empty State Banner */}
@@ -72,7 +115,7 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
             <div className="max-w-xl space-y-2">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#007AFF]/10 text-[#007AFF] text-xs font-semibold">
                 <Sparkles className="h-3.5 w-3.5" />
-                <span>Chromium MV3 Extension</span>
+                <span>Chromium MV3 Local-First Architecture</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#1D1D1F] dark:text-[#F5F5F7]">
                 {t.emptyDashboardTitle}
@@ -90,11 +133,14 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <button
-              onClick={() => onNavigateSection('search-scan')}
-              className="flex items-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-[#007AFF] hover:bg-[#0062CC] rounded-xl transition-all shadow-2xs cursor-pointer"
+              onClick={() => {
+                onNewProductSearch();
+                onNavigateSection('search-scan');
+              }}
+              className="flex items-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-100 rounded-xl transition-all shadow-2xs cursor-pointer"
             >
-              <Search className="h-4 w-4" />
-              <span>{t.btnGoToSearchScan}</span>
+              <Plus className="h-4 w-4" />
+              <span>{t.btnNewProductSearch}</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
 
@@ -109,54 +155,62 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
           </div>
         </div>
 
-        {/* Previous Search Records (if any exist in local storage) */}
-        {searchHistory.length > 0 && (
+        {/* Previous Saved Products in History */}
+        {productHistory.length > 0 && (
           <div className="rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] p-5 dark:border-[#2C2C2E] dark:bg-[#1C1C1E] shadow-2xs space-y-4">
             <div className="flex items-center justify-between border-b border-[#E5E5EA] dark:border-[#2C2C2E] pb-3">
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-[#007AFF]" />
                 <h2 className="text-module-title text-[#1D1D1F] dark:text-[#F5F5F7]">
-                  {t.historyTitle}
+                  {language === 'en' ? 'Completed Products in History' : '历史已归档产品'}
                 </h2>
               </div>
               <button
                 onClick={() => onNavigateSection('history')}
                 className="text-xs font-semibold text-[#007AFF] hover:underline flex items-center gap-1"
               >
-                <span>View All ({searchHistory.length})</span>
+                <span>View All ({productHistory.length})</span>
                 <ChevronRight className="h-3.5 w-3.5" />
               </button>
             </div>
 
             <div className="divide-y divide-[#E5E5EA] dark:divide-[#2C2C2E]">
-              {searchHistory.slice(0, 4).map((record) => (
-                <div
-                  key={record.id}
-                  className="py-3 flex items-center justify-between gap-3 hover:bg-[#F2F2F7]/50 dark:hover:bg-[#2C2C2E]/40 px-2 rounded-xl transition-colors"
-                >
-                  <div className="space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
-                        {record.keyword}
-                      </span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-[#F2F2F7] dark:bg-[#2C2C2E] text-[#1D1D1F] dark:text-[#F5F5F7]">
-                        {record.platform}
-                      </span>
-                    </div>
-                    <div className="text-[11px] text-[#8E8E93] font-mono">
-                      {record.queryTime} · {record.itemsCount} products {record.alertCount > 0 ? `· ${record.alertCount} alert(s)` : ''}
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => onOpenHistoryRecord(record)}
-                    className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-[#007AFF] bg-[#007AFF]/10 hover:bg-[#007AFF]/15 rounded-lg transition-colors cursor-pointer"
+              {productHistory.slice(0, 5).map((record) => {
+                const plats = Object.keys(record.platformResults || {});
+                return (
+                  <div
+                    key={record.productId}
+                    className="py-3 flex items-center justify-between gap-3 hover:bg-[#F2F2F7]/50 dark:hover:bg-[#2C2C2E]/40 px-2 rounded-xl transition-colors"
                   >
-                    <span>{t.btnOpenResult}</span>
-                    <ChevronRight className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
+                          {record.productName}
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-[#F2F2F7] dark:bg-[#2C2C2E] text-[#1D1D1F] dark:text-[#F5F5F7]">
+                          {plats.length} {language === 'en' ? 'platform(s)' : '个平台'}
+                        </span>
+                        {record.summary?.avgRating !== null && record.summary?.avgRating !== undefined && (
+                          <span className="text-[11px] font-bold text-amber-500 font-mono">
+                            {record.summary.avgRating}★
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[11px] text-[#8E8E93] font-mono">
+                        {record.updatedAt || record.startedAt} · {record.summary?.totalReviews.toLocaleString() || 0} reviews
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => onOpenProduct(record)}
+                      className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-[#007AFF] bg-[#007AFF]/10 hover:bg-[#007AFF]/15 rounded-lg transition-colors cursor-pointer"
+                    >
+                      <FolderOpen className="h-3.5 w-3.5" />
+                      <span>{t.btnRestoreProduct || 'Restore'}</span>
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -164,14 +218,85 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
     );
   }
 
-  // Case B: Real Scan Results Exist (Requirement 4)
+  // Case B: Real Active Product Session Exists (Requirement 8: Dashboard only displays the current product)
+  const summary = currentSession.summary;
+
   return (
     <div className="space-y-6">
-      {/* 1. KPI Overview (Reflects real scan results) */}
+      {/* 1. Active Product Header Banner */}
+      <div className="rounded-2xl border border-[#007AFF]/30 bg-gradient-to-r from-white via-white to-[#007AFF]/5 dark:border-[#007AFF]/30 dark:from-[#1C1C1E] dark:to-[#007AFF]/10 p-5 shadow-2xs space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#007AFF] text-white">
+                {t.activeSessionBadge || 'Active Product'}
+              </span>
+              <h1 className="text-lg font-bold text-[#1D1D1F] dark:text-[#F5F5F7]">
+                {currentSession.productName}
+              </h1>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#8E8E93] font-mono">
+              {currentSession.identifiers?.upc && (
+                <span className="bg-[#F2F2F7] dark:bg-[#2C2C2E] px-1.5 py-0.5 rounded">
+                  UPC: {currentSession.identifiers.upc}
+                </span>
+              )}
+              {currentSession.identifiers?.model && (
+                <span className="bg-[#F2F2F7] dark:bg-[#2C2C2E] px-1.5 py-0.5 rounded">
+                  Model: {currentSession.identifiers.model}
+                </span>
+              )}
+              {currentSession.identifiers?.walmartNumber && (
+                <span className="bg-[#F2F2F7] dark:bg-[#2C2C2E] px-1.5 py-0.5 rounded">
+                  WM#: {currentSession.identifiers.walmartNumber}
+                </span>
+              )}
+              {currentSession.identifiers?.amazonNumber && (
+                <span className="bg-[#F2F2F7] dark:bg-[#2C2C2E] px-1.5 py-0.5 rounded">
+                  ASIN: {currentSession.identifiers.amazonNumber}
+                </span>
+              )}
+              {currentSession.identifiers?.targetNumber && (
+                <span className="bg-[#F2F2F7] dark:bg-[#2C2C2E] px-1.5 py-0.5 rounded">
+                  TCIN: {currentSession.identifiers.targetNumber}
+                </span>
+              )}
+              {currentSession.identifiers?.costcoNumber && (
+                <span className="bg-[#F2F2F7] dark:bg-[#2C2C2E] px-1.5 py-0.5 rounded">
+                  Costco#: {currentSession.identifiers.costcoNumber}
+                </span>
+              )}
+              <span>· {currentSession.updatedAt}</span>
+            </div>
+          </div>
+
+          {/* Prominent New Product Search Button */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onNewProductSearch}
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-100 rounded-xl transition-all shadow-2xs cursor-pointer whitespace-nowrap"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              <span>{t.btnNewProductSearch}</span>
+            </button>
+
+            <button
+              onClick={() => onNavigateSection('search-scan')}
+              className="flex items-center gap-1 px-3 py-2 text-xs font-medium text-[#007AFF] bg-[#007AFF]/10 hover:bg-[#007AFF]/15 rounded-xl transition-colors cursor-pointer whitespace-nowrap"
+            >
+              <span>{language === 'en' ? 'Scan Next Channel' : '查询更多平台'}</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Current Product KPI Overview */}
       <KpiOverview
         watchlistCount={watchlistCount}
-        lowRatingCount={lowRatingCount}
-        platformsCount={PLAT_ORDER.length}
+        lowRatingCount={summary?.lowRatingPlatforms.length || 0}
+        platformsCount={completedPlats.length}
         alertCount={alertGroups.length}
         threshold={threshold}
         language={language}
@@ -180,18 +305,9 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
         onOpenWatchlist={() => onNavigateSection('watchlist')}
       />
 
-      {/* 2. Alert Center (High-priority alert list) */}
-      <AlertCenter
-        groups={groups}
-        threshold={threshold}
-        language={language}
-        onSelectGroup={onSelectGroup}
-        onOpenAlertsPage={() => onNavigateSection('search-scan')}
-      />
-
-      {/* 3. Executive Quality Key Findings (Natural language synthesis) */}
+      {/* 3. Executive Quality Key Findings (Natural language synthesis for current product) */}
       <ExecutiveSummary
-        groups={groups}
+        groups={currentGroups}
         threshold={threshold}
         onThresholdChange={onThresholdChange}
         focusOnly={false}
@@ -201,88 +317,108 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
         onClear={() => {}}
       />
 
-      {/* 4. Split Layout: Cross-Platform Health Matrix & Recent Queries */}
+      {/* 4. Split Layout: Cross-Platform Matrix (All 7 Channels) & History Snapshot */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left: Cross Platform Matrix Preview */}
+        {/* Left: Cross Platform Matrix for Current Product */}
         <div className="lg:col-span-8 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] p-5 dark:border-[#2C2C2E] dark:bg-[#1C1C1E] shadow-2xs space-y-4">
           <div className="flex items-center justify-between border-b border-[#E5E5EA] dark:border-[#2C2C2E] pb-3">
             <div className="flex items-center gap-2">
               <Layers className="h-4 w-4 text-[#007AFF]" />
               <h2 className="text-module-title text-[#1D1D1F] dark:text-[#F5F5F7]">
-                {t.tabCrossPlatform}
+                {t.tabCrossPlatform} ({completedPlats.length} / {PLAT_ORDER.length} {language === 'en' ? 'Channels' : '平台'})
               </h2>
             </div>
             <button
               onClick={() => onNavigateSection('search-scan')}
               className="text-xs font-semibold text-[#007AFF] hover:underline flex items-center gap-1"
             >
-              <span>{t.colDetails}</span>
+              <span>{language === 'en' ? 'Open Scan Studio' : '进入扫描工作室'}</span>
               <ChevronRight className="h-3.5 w-3.5" />
             </button>
           </div>
 
+          {/* Matrix Table with 7 platforms */}
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-[#E5E5EA] dark:border-[#2C2C2E] text-[11px] font-semibold text-[#8E8E93] uppercase">
-                  <th className="py-2.5 px-3">Product</th>
-                  {PLAT_ORDER.map((plat) => (
-                    <th key={plat} className="py-2.5 px-2 text-center whitespace-nowrap">
-                      {PLAT_LABEL[plat]}
-                    </th>
-                  ))}
-                  <th className="py-2.5 px-3 text-right">{t.colStatus}</th>
+                <tr className="border-b border-[#E5E5EA] dark:border-[#2C2C2E] text-[11px] font-semibold text-[#8E8E93]">
+                  <th className="py-2.5 px-3">{language === 'en' ? 'Monitored Channel' : '监控渠道'}</th>
+                  <th className="py-2.5 px-3">{language === 'en' ? 'Status' : '状态'}</th>
+                  <th className="py-2.5 px-3 text-right">{language === 'en' ? 'Rating' : '评分'}</th>
+                  <th className="py-2.5 px-3 text-right">{language === 'en' ? 'Reviews' : '评论数'}</th>
+                  <th className="py-2.5 px-3 text-right">{language === 'en' ? 'Quality Status' : '质检预警'}</th>
+                  <th className="py-2.5 px-3 text-right">{language === 'en' ? 'Actions' : '操作'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E5E5EA] dark:divide-[#2C2C2E]">
-                {groups.slice(0, 6).map((g) => {
-                  const breached = belowPlatforms(g, threshold);
-                  const isAlert = breached.length > 0;
+                {PLAT_ORDER.map((pCode) => {
+                  const res = currentSession.platformResults[pCode];
+                  const isScanned = !!res;
 
                   return (
                     <tr
-                      key={g.id}
-                      onClick={() => onSelectGroup(g)}
-                      className="hover:bg-[#F5F5F7] dark:hover:bg-[#2C2C2E]/40 transition-colors cursor-pointer"
+                      key={pCode}
+                      className="hover:bg-[#F2F2F7]/50 dark:hover:bg-[#2C2C2E]/40 transition-colors"
                     >
-                      <td className="py-3 px-3 font-semibold text-[#1D1D1F] dark:text-[#F5F5F7] truncate max-w-[200px]">
-                        {g.name}
+                      <td className="py-3 px-3 font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
+                        {PLAT_LABEL[pCode]}
                       </td>
-
-                      {PLAT_ORDER.map((plat) => {
-                        const sc = g.platforms[plat];
-                        if (!sc || sc.rating === null) {
-                          return (
-                            <td
-                              key={plat}
-                              className="py-3 px-2 text-center text-[#C7C7CC] dark:text-[#48484A]"
-                            >
-                              —
-                            </td>
-                          );
-                        }
-                        const isLow = sc.rating < threshold;
-                        return (
-                          <td
-                            key={plat}
-                            className={`py-3 px-2 text-center font-mono tabular-nums ${
-                              isLow
-                                ? 'text-[#FF3B30] font-bold bg-[#FFF2F0]/60 dark:bg-[#3D1412]/40'
-                                : 'text-[#1D1D1F] dark:text-[#F5F5F7]'
-                            }`}
-                          >
-                            {sc.rating.toFixed(1)}
-                          </td>
-                        );
-                      })}
-
-                      <td className="py-3 px-3 text-right">
-                        {isAlert ? (
-                          <span className="text-[11px] font-bold text-[#FF3B30]">
-                            {breached.length} Alert
+                      <td className="py-3 px-3">
+                        {isScanned ? (
+                          <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                            {t.statusCompleted || '已完成'}
                           </span>
                         ) : (
-                          <span className="text-[11px] font-medium text-[#34C759]">OK</span>
+                          <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-neutral-100 dark:bg-neutral-800 text-[#8E8E93]">
+                            {t.statusNotScanned || '未查询'}
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 px-3 text-right font-mono font-bold">
+                        {isScanned && typeof res.rating === 'number' ? (
+                          <span className={res.rating < threshold ? 'text-[#FF3B30]' : 'text-emerald-600 dark:text-emerald-400'}>
+                            {res.rating.toFixed(1)}★
+                          </span>
+                        ) : (
+                          <span className="text-[#8E8E93] font-normal">—</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-3 text-right font-mono text-[#8E8E93]">
+                        {isScanned && res.reviewCount != null ? res.reviewCount.toLocaleString() : '—'}
+                      </td>
+                      <td className="py-3 px-3 text-right">
+                        {isScanned ? (
+                          <span
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              res.alertStatus === 'ALERT'
+                                ? 'bg-[#FF3B30]/10 text-[#FF3B30]'
+                                : 'bg-[#34C759]/10 text-[#34C759]'
+                            }`}
+                          >
+                            {res.alertStatus}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-[#8E8E93]">—</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-3 text-right">
+                        {isScanned ? (
+                          <a
+                            href={res.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-[#007AFF] hover:underline text-[11px]"
+                          >
+                            <span>Open</span>
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        ) : (
+                          <button
+                            onClick={() => onNavigateSection('search-scan')}
+                            className="text-[#007AFF] font-medium hover:underline text-[11px]"
+                          >
+                            + Scan
+                          </button>
                         )}
                       </td>
                     </tr>
@@ -293,51 +429,71 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
           </div>
         </div>
 
-        {/* Right: Personal Search History Quick Widget */}
-        <div className="lg:col-span-4 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] p-5 dark:border-[#2C2C2E] dark:bg-[#1C1C1E] shadow-2xs space-y-4">
-          <div className="flex items-center justify-between border-b border-[#E5E5EA] dark:border-[#2C2C2E] pb-3">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-[#007AFF]" />
-              <h2 className="text-module-title text-[#1D1D1F] dark:text-[#F5F5F7]">
-                {t.historyTitle}
-              </h2>
+        {/* Right: History Archive (Switch to other completed products) */}
+        <div className="lg:col-span-4 rounded-2xl border border-[#E5E5EA] bg-[#FFFFFF] p-5 dark:border-[#2C2C2E] dark:bg-[#1C1C1E] shadow-2xs space-y-4 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between border-b border-[#E5E5EA] dark:border-[#2C2C2E] pb-3">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-[#007AFF]" />
+                <h2 className="text-module-title text-[#1D1D1F] dark:text-[#F5F5F7]">
+                  {language === 'en' ? 'Saved Products' : '已保存产品库'}
+                </h2>
+              </div>
+              <button
+                onClick={() => onNavigateSection('history')}
+                className="text-xs font-semibold text-[#007AFF] hover:underline"
+              >
+                All ({productHistory.length})
+              </button>
             </div>
-            <button
-              onClick={() => onNavigateSection('history')}
-              className="text-xs font-semibold text-[#007AFF] hover:underline"
-            >
-              All ({searchHistory.length})
-            </button>
+
+            <div className="divide-y divide-[#E5E5EA] dark:divide-[#2C2C2E] mt-1">
+              {productHistory.slice(0, 4).map((p) => {
+                const isSelected = p.productId === currentSession.productId;
+                const pCount = Object.keys(p.platformResults || {}).length;
+
+                return (
+                  <div
+                    key={p.productId}
+                    className="py-3 flex items-center justify-between gap-2"
+                  >
+                    <div className="space-y-0.5 min-w-0">
+                      <div className="font-semibold text-xs text-[#1D1D1F] dark:text-[#F5F5F7] truncate">
+                        {p.productName}
+                      </div>
+                      <div className="text-[11px] text-[#8E8E93] font-mono">
+                        {pCount} platforms · {p.summary?.avgRating ? `${p.summary.avgRating}★` : ''}
+                      </div>
+                    </div>
+
+                    {isSelected ? (
+                      <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-[#007AFF]/10 text-[#007AFF]">
+                        Active
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => onOpenProduct(p)}
+                        className="px-2.5 py-1 text-[11px] font-medium text-[#007AFF] bg-[#007AFF]/10 hover:bg-[#007AFF]/15 rounded-lg transition-colors cursor-pointer shrink-0"
+                      >
+                        Restore
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
-          <div className="space-y-2">
-            {searchHistory.length === 0 ? (
-              <div className="p-6 text-center text-xs text-[#8E8E93]">
-                {t.emptyHistoryTitle}
-              </div>
-            ) : (
-              searchHistory.slice(0, 5).map((rec) => (
-                <div
-                  key={rec.id}
-                  onClick={() => onOpenHistoryRecord(rec)}
-                  className="p-3 rounded-xl border border-[#E5E5EA] dark:border-[#2C2C2E] hover:border-[#007AFF] hover:bg-[#007AFF]/5 transition-all cursor-pointer space-y-1"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-[#1D1D1F] dark:text-[#F5F5F7] truncate">
-                      {rec.keyword}
-                    </span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#F2F2F7] dark:bg-[#2C2C2E] font-medium text-[#8E8E93]">
-                      {rec.platform}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-[11px] text-[#8E8E93] font-mono">
-                    <span>{rec.itemsCount} products</span>
-                    <span>{rec.queryTime.split(' ')[0]}</span>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+          <button
+            onClick={() => {
+              onNewProductSearch();
+              onNavigateSection('search-scan');
+            }}
+            className="w-full flex items-center justify-center gap-1.5 py-2.5 px-3 text-xs font-semibold text-white bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-100 rounded-xl transition-all shadow-2xs mt-3 cursor-pointer"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            <span>{t.btnNewProductSearch}</span>
+          </button>
         </div>
       </div>
     </div>
