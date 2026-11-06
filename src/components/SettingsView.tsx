@@ -75,9 +75,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
             {[
-              { id: 'en' as Language, label: 'English', desc: 'Default international' },
-              { id: 'zh-CN' as Language, label: '简体中文', desc: 'Simplified Chinese' },
-              { id: 'zh-TW' as Language, label: '繁體中文', desc: 'Traditional Chinese' }
+              { id: 'en' as Language, label: 'English', desc: 'English (US & International)' },
+              { id: 'zh-CN' as Language, label: '简体中文', desc: '简体中文界面' },
+              { id: 'zh-Hant' as Language, label: '繁體中文', desc: '繁體中文介面' }
             ].map((item) => (
               <button
                 key={item.id}
@@ -316,10 +316,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           <div className="flex items-center justify-between">
             <div>
               <div className="text-xs font-semibold text-[#1D1D1F] dark:text-[#F5F5F7]">
-                Personal Local Storage Reset
+                {form.language === 'en' ? 'Personal Local Storage Reset' : form.language === 'zh-Hant' ? '個人本機儲存空間重設' : '个人本地存储空间重置'}
               </div>
               <div className="text-[11px] text-[#8E8E93]">
-                Permanently wipes all locally cached product scans and query history from chrome.storage.local on this browser.
+                {form.language === 'en'
+                  ? 'Permanently wipes all locally cached product scans and query history from chrome.storage.local on this browser.'
+                  : form.language === 'zh-Hant'
+                  ? '將永久清除本瀏覽器上的所有本機快取產品掃描和查詢歷史記錄。'
+                  : '将永久清除本浏览器上的所有本地缓存产品扫描和查询历史记录。'}
               </div>
             </div>
             <button
@@ -328,7 +332,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[#FF3B30] bg-[#FF3B30]/10 hover:bg-[#FF3B30]/20 rounded-xl transition-colors font-medium cursor-pointer"
             >
               <Trash2 className="h-3.5 w-3.5" />
-              <span>{clearedToast ? 'Local Data Cleared!' : 'Clear All Local Data'}</span>
+              <span>
+                {clearedToast
+                  ? (form.language === 'en' ? 'Local Data Cleared!' : '本地数据已清空！')
+                  : (form.language === 'en' ? 'Clear All Local Data' : '清空全部本地数据')}
+              </span>
             </button>
           </div>
         </div>
@@ -350,7 +358,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
             className="flex items-center gap-1.5 px-5 py-2 text-xs font-semibold text-white bg-[#007AFF] hover:bg-[#0062CC] rounded-xl transition-colors shadow-2xs cursor-pointer"
           >
             {saved ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}
-            <span>{saved ? 'Saved!' : t.btnSaveSettings}</span>
+            <span>{saved ? (form.language === 'en' ? 'Saved!' : '已保存！') : t.btnSaveSettings}</span>
           </button>
         </div>
       </div>

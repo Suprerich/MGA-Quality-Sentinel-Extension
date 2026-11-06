@@ -39,6 +39,7 @@ import {
 } from './services/summaryService';
 import {
   DEFAULT_PREFERENCES,
+  getInitialPreferences,
   loadSyncPreferences,
   saveSyncPreferences,
   loadSyncWatchlist,
@@ -98,7 +99,7 @@ const CODE_TO_RETAILER: Record<PlatformCode, RetailerId> = {
 export default function App() {
   const [activeSection, setActiveSection] = useState<NavSection>('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [preferences, setPreferences] = useState<UserPreferences>(DEFAULT_PREFERENCES);
+  const [preferences, setPreferences] = useState<UserPreferences>(getInitialPreferences);
   const [lastScanTime, setLastScanTime] = useState<string>('Not scanned yet');
 
   // Query Form State for Search & Scan
@@ -216,7 +217,7 @@ export default function App() {
     showToast(
       newLang === 'zh-CN'
         ? '已切换至简体中文'
-        : newLang === 'zh-TW'
+        : newLang === 'zh-Hant'
         ? '已切換至繁體中文'
         : 'Switched to English'
     );
@@ -853,8 +854,9 @@ export default function App() {
                 onUpdateWatchlist={async (items) => {
                   setWatchlist(items);
                   await saveSyncWatchlist(items);
-                  showToast('Watchlist synchronized to browser storage.');
+                  showToast(preferences.language === 'en' ? 'Watchlist synchronized.' : '关注产品库已同步。');
                 }}
+                language={preferences.language || 'en'}
               />
             )}
 
@@ -881,12 +883,12 @@ export default function App() {
                 onUpdatePreferences={async (newPrefs) => {
                   setPreferences(newPrefs);
                   await saveSyncPreferences(newPrefs);
-                  showToast('Preferences updated and synchronized.');
+                  showToast(preferences.language === 'en' ? 'Preferences updated.' : '配置已保存并同步。');
                 }}
                 onResetToDefaults={async () => {
                   setPreferences(DEFAULT_PREFERENCES);
                   await saveSyncPreferences(DEFAULT_PREFERENCES);
-                  showToast('Settings restored to defaults.');
+                  showToast(preferences.language === 'en' ? 'Settings restored to defaults.' : '已恢复默认设置。');
                 }}
                 onClearAllLocalData={handleClearAllLocalData}
               />
@@ -900,6 +902,7 @@ export default function App() {
         group={selectedGroup}
         threshold={preferences.threshold}
         onClose={() => setSelectedGroup(null)}
+        language={preferences.language || 'en'}
       />
 
       {/* Switch Product Confirmation Modal (Requirement 6) */}
@@ -916,6 +919,7 @@ export default function App() {
       <ExtensionInstallModal
         isOpen={isInstallModalOpen}
         onClose={() => setIsInstallModalOpen(false)}
+        language={preferences.language || 'en'}
       />
 
       {/* Toast Notification */}

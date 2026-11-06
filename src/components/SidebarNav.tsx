@@ -98,7 +98,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
                 <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[#007AFF]/10 text-[#007AFF]">QA</span>
               </div>
               <div className="text-[10px] text-[#8E8E93] truncate font-medium">
-                Quality Dashboard
+                {t.appSubtitle}
               </div>
             </div>
           )}
@@ -108,7 +108,7 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
         <button
           onClick={onToggleCollapse}
           className="rounded-lg p-1.5 text-[#8E8E93] hover:bg-[#F2F2F7] hover:text-[#1D1D1F] dark:hover:bg-[#2C2C2E] dark:hover:text-[#F5F5F7] transition-colors"
-          title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+          title={collapsed ? t.expandSidebar : t.collapseSidebar}
         >
           {collapsed ? (
             <ChevronRight className="h-4 w-4" />

@@ -31,18 +31,38 @@ function hasChromeLocal(): boolean {
   return typeof window !== 'undefined' && Boolean((window as any).chrome?.storage?.local);
 }
 
+// Synchronous preference retrieval to prevent flash of English on startup
+export function getInitialPreferences(): UserPreferences {
+  try {
+    const raw = typeof window !== 'undefined' ? localStorage.getItem(SYNC_KEYS.PREFERENCES) : null;
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed.language === 'zh-TW') parsed.language = 'zh-Hant';
+      return { ...DEFAULT_PREFERENCES, ...parsed };
+    }
+  } catch (e) {}
+  return DEFAULT_PREFERENCES;
+}
+
 // 1. Sync Tier (chrome.storage.sync for settings & watchlist)
 export async function loadSyncPreferences(): Promise<UserPreferences> {
   if (hasChromeSync()) {
     return new Promise((resolve) => {
       (window as any).chrome.storage.sync.get([SYNC_KEYS.PREFERENCES], (res: any) => {
-        resolve(res?.[SYNC_KEYS.PREFERENCES] || DEFAULT_PREFERENCES);
+        const val = res?.[SYNC_KEYS.PREFERENCES] || DEFAULT_PREFERENCES;
+        if (val.language === 'zh-TW') val.language = 'zh-Hant';
+        resolve(val);
       });
     });
   }
   try {
     const raw = localStorage.getItem(SYNC_KEYS.PREFERENCES);
-    return raw ? JSON.parse(raw) : DEFAULT_PREFERENCES;
+    if (raw) {
+      const val = JSON.parse(raw);
+      if (val.language === 'zh-TW') val.language = 'zh-Hant';
+      return val;
+    }
+    return DEFAULT_PREFERENCES;
   } catch (e) {
     return DEFAULT_PREFERENCES;
   }

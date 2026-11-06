@@ -55,8 +55,13 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   const languages: { id: Language; label: string; short: string }[] = [
     { id: 'en', label: 'English', short: 'EN' },
     { id: 'zh-CN', label: '简体中文', short: '简' },
-    { id: 'zh-TW', label: '繁體中文', short: '繁' }
+    { id: 'zh-Hant', label: '繁體中文', short: '繁' }
   ];
+
+  const localizedScanTime =
+    lastScanTime === 'Not scanned yet'
+      ? t.notScannedYet
+      : lastScanTime.replace('Today', language === 'en' ? 'Today' : '今日');
 
   return (
     <header className="sticky top-0 z-20 w-full border-b border-[#E5E5EA] bg-[#FFFFFF]/95 backdrop-blur-md dark:border-[#2C2C2E] dark:bg-[#1C1C1E]/95 transition-colors">
@@ -84,18 +89,18 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                 }`}
                 title={
                   isExtensionRuntime()
-                    ? 'Connected directly to Chromium Extension Runtime (tabs, storage, scripting active)'
-                    : 'Running in Web Engine Mode. Download extension for direct tab injection.'
+                    ? 'Chromium MV3 Extension Runtime'
+                    : 'Web Engine Mode'
                 }
               >
                 <span className={`h-1.5 w-1.5 rounded-full ${isExtensionRuntime() ? 'bg-emerald-500 animate-pulse' : 'bg-[#007AFF]'}`} />
-                {isExtensionRuntime() ? 'Extension Mode' : 'Web Live Mode'}
+                {isExtensionRuntime() ? t.extensionMode : t.webMode}
               </span>
             </div>
 
             <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-[#8E8E93] font-mono">
               <Clock className="h-3 w-3 text-[#8E8E93]" />
-              <span>{t.lastScan}: {lastScanTime}</span>
+              <span>{t.lastScan}: {localizedScanTime}</span>
             </div>
           </div>
         </div>

@@ -9,9 +9,10 @@ import {
   CheckCircle2,
   HelpCircle
 } from 'lucide-react';
-import { CrossPlatformGroup, PlatformCode, ProductItem } from '../types';
+import { CrossPlatformGroup, PlatformCode, ProductItem, Language } from '../types';
 import { PLAT_ORDER, PLAT_LABEL, belowPlatforms } from '../services/summaryService';
 import { exportProductsCsv } from '../services/exportService';
+import { getTranslation } from '../services/i18n';
 
 interface CrossPlatformMatrixProps {
   groups: CrossPlatformGroup[];
@@ -19,6 +20,7 @@ interface CrossPlatformMatrixProps {
   threshold: number;
   onSelectGroup: (group: CrossPlatformGroup) => void;
   onOpenExactUrl?: (url: string) => void;
+  language?: Language;
 }
 
 export const CrossPlatformMatrix: React.FC<CrossPlatformMatrixProps> = ({
@@ -26,8 +28,10 @@ export const CrossPlatformMatrix: React.FC<CrossPlatformMatrixProps> = ({
   allProducts,
   threshold,
   onSelectGroup,
-  onOpenExactUrl
+  onOpenExactUrl,
+  language = 'en'
 }) => {
+  const t = getTranslation(language);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'alert' | 'ok'>('all');
 
@@ -62,7 +66,7 @@ export const CrossPlatformMatrix: React.FC<CrossPlatformMatrixProps> = ({
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-400" />
             <input
               type="text"
-              placeholder="Search product name, UPC, or model..."
+              placeholder={language === 'en' ? 'Search product name, UPC, or model...' : '搜索商品名称、UPC条码或型号...'}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-64 sm:w-80 rounded-md border border-neutral-200 bg-neutral-50/80 py-1.5 pl-8 pr-3 text-xs placeholder:text-neutral-400 focus:border-neutral-900 focus:bg-white focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:focus:border-neutral-400 dark:text-white"
@@ -79,7 +83,7 @@ export const CrossPlatformMatrix: React.FC<CrossPlatformMatrixProps> = ({
                   : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
               }`}
             >
-              All ({groups.length})
+              {language === 'en' ? 'All' : '全部'} ({groups.length})
             </button>
             <button
               onClick={() => setStatusFilter('alert')}
@@ -89,7 +93,7 @@ export const CrossPlatformMatrix: React.FC<CrossPlatformMatrixProps> = ({
                   : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
               }`}
             >
-              Below Benchmark ({groups.filter((g) => belowPlatforms(g, threshold).length > 0).length})
+              {language === 'en' ? 'Below Benchmark' : '低于警戒值'} ({groups.filter((g) => belowPlatforms(g, threshold).length > 0).length})
             </button>
             <button
               onClick={() => setStatusFilter('ok')}
@@ -99,7 +103,7 @@ export const CrossPlatformMatrix: React.FC<CrossPlatformMatrixProps> = ({
                   : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
               }`}
             >
-              Compliant ({groups.filter((g) => belowPlatforms(g, threshold).length === 0).length})
+              {language === 'en' ? 'Compliant' : '达标合格'} ({groups.filter((g) => belowPlatforms(g, threshold).length === 0).length})
             </button>
           </div>
         </div>
@@ -107,11 +111,11 @@ export const CrossPlatformMatrix: React.FC<CrossPlatformMatrixProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={handleExportCsv}
-            title="Download full rating dataset as CSV"
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-neutral-700 bg-neutral-100 hover:bg-neutral-200 rounded-md transition-colors dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+            title={language === 'en' ? 'Download full rating dataset as CSV' : '导出全部评分CSV'}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-neutral-700 bg-neutral-100 hover:bg-neutral-200 rounded-md transition-colors dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 cursor-pointer"
           >
             <Download className="h-3.5 w-3.5" />
-            <span>Export CSV</span>
+            <span>{t.btnExportCsv}</span>
           </button>
         </div>
       </div>
@@ -121,24 +125,24 @@ export const CrossPlatformMatrix: React.FC<CrossPlatformMatrixProps> = ({
         <table className="w-full text-left border-collapse text-xs">
           <thead>
             <tr className="border-b border-neutral-200/80 bg-neutral-50/75 dark:border-neutral-800 dark:bg-neutral-800/40 text-[11px] font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
-              <th className="py-3 px-4 min-w-[260px]">Product Identification</th>
+              <th className="py-3 px-4 min-w-[260px]">{language === 'en' ? 'Product Identification' : '产品系列与标识'}</th>
               {PLAT_ORDER.map((plat) => (
                 <th key={plat} className="py-3 px-3 text-center min-w-[105px]">
                   {PLAT_LABEL[plat]}
                 </th>
               ))}
               <th className="py-3 px-3 text-center min-w-[85px]">
-                &lt; {threshold.toFixed(1)} Channels
+                &lt; {threshold.toFixed(1)} {language === 'en' ? 'Channels' : '个平台'}
               </th>
-              <th className="py-3 px-3 text-center min-w-[90px]">Status</th>
-              <th className="py-3 px-4 text-right min-w-[80px]">Action</th>
+              <th className="py-3 px-3 text-center min-w-[90px]">{t.colStatus || '状态'}</th>
+              <th className="py-3 px-4 text-right min-w-[80px]">{t.colActions || '操作'}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800/60">
             {filteredGroups.length === 0 ? (
               <tr>
                 <td colSpan={11} className="py-12 text-center text-neutral-500 dark:text-neutral-400">
-                  No monitored products matched your filter criteria.
+                  {language === 'en' ? 'No monitored products matched your filter criteria.' : '没有符合筛选条件的监控商品。'}
                 </td>
               </tr>
             ) : (
@@ -163,13 +167,13 @@ export const CrossPlatformMatrix: React.FC<CrossPlatformMatrixProps> = ({
                         {g.model && <span>Model: {g.model}</span>}
                         {g._wl && (
                           <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                            · Watchlist Verified
+                            · {language === 'en' ? 'Watchlist Verified' : '关注库已认证'}
                           </span>
                         )}
                       </div>
                     </td>
 
-                    {/* Column 2 - 6: Platforms */}
+                    {/* Column 2 - 8: Platforms */}
                     {PLAT_ORDER.map((plat) => {
                       const score = g.platforms[plat];
                       if (!score || score.rating === null) {
@@ -203,11 +207,11 @@ export const CrossPlatformMatrix: React.FC<CrossPlatformMatrixProps> = ({
                       );
                     })}
 
-                    {/* Column 7: Breached Channels */}
+                    {/* Column 9: Breached Channels */}
                     <td className="py-3.5 px-3 text-center tabular-nums font-semibold">
                       {breached.length > 0 ? (
                         <span className="text-red-600 dark:text-red-400">
-                          {breached.length} / 5
+                          {breached.length} / {PLAT_ORDER.length}
                         </span>
                       ) : (
                         <span className="text-emerald-600 dark:text-emerald-400">
@@ -216,25 +220,25 @@ export const CrossPlatformMatrix: React.FC<CrossPlatformMatrixProps> = ({
                       )}
                     </td>
 
-                    {/* Column 8: Health Status Tag */}
+                    {/* Column 10: Health Status Tag */}
                     <td className="py-3.5 px-3 text-center">
                       {isAlert ? (
                         <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-600 dark:text-red-400">
                           <AlertCircle className="h-3 w-3" />
-                          <span>ALERT</span>
+                          <span>{language === 'en' ? 'ALERT' : '预警'}</span>
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
                           <CheckCircle2 className="h-3 w-3" />
-                          <span>PASS</span>
+                          <span>{language === 'en' ? 'PASS' : '达标'}</span>
                         </span>
                       )}
                     </td>
 
-                    {/* Column 9: Action */}
+                    {/* Column 11: Action */}
                     <td className="py-3.5 px-4 text-right">
                       <span className="inline-flex items-center gap-1 text-xs font-medium text-neutral-500 group-hover:text-neutral-900 dark:group-hover:text-white transition-colors">
-                        <span>Details</span>
+                        <span>{t.viewDetails}</span>
                         <ChevronRight className="h-3.5 w-3.5" />
                       </span>
                     </td>
@@ -249,10 +253,14 @@ export const CrossPlatformMatrix: React.FC<CrossPlatformMatrixProps> = ({
       {/* Table Footer */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3.5 bg-neutral-50/50 dark:bg-neutral-800/30 border-t border-neutral-100 dark:border-neutral-800 text-[11px] text-neutral-500 dark:text-neutral-400">
         <div>
-          Showing {filteredGroups.length} of {groups.length} grouped product lines
+          {language === 'en'
+            ? `Showing ${filteredGroups.length} of ${groups.length} grouped product lines`
+            : `展示 ${filteredGroups.length} / ${groups.length} 个聚合商品系列`}
         </div>
         <div>
-          Cross-platform series conflict prevention active · Ratings strictly checked against threshold &lt; {threshold.toFixed(1)}
+          {language === 'en'
+            ? `Cross-platform series conflict prevention active · Ratings strictly checked against threshold < ${threshold.toFixed(1)}`
+            : `跨平台系列防冲突机制运行中 · 严格基于低于警戒值 < ${threshold.toFixed(1)} 进行筛选判断`}
         </div>
       </div>
     </div>

@@ -211,7 +211,9 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                 <option value="newest">{t.sortNewest}</option>
                 <option value="oldest">{t.sortOldest}</option>
                 <option value="platforms">{language === 'en' ? 'Most Platforms Scanned' : '已完成平台最多'}</option>
-                <option value="rating">{language === 'en' ? 'Highest Rating First' : '平均评分由高到低'}</option>
+                <option value="rating">
+                  {language === 'en' ? 'Lowest Rating First' : language === 'zh-Hant' ? '最低評分由低到高' : '最低评分由低到高'}
+                </option>
               </select>
             </div>
           </div>
@@ -474,27 +476,27 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                     <div className="pt-2 border-t border-[#E5E5EA] dark:border-[#2C2C2E] flex flex-wrap items-center justify-between gap-3 text-xs">
                       <div className="flex flex-wrap items-center gap-4">
                         <div className="flex items-center gap-1.5 font-medium">
-                          <span className="text-[#8E8E93]">{language === 'en' ? 'Lowest Rating:' : '全网最低评分：'}</span>
+                          <span className="text-[#8E8E93]">{t.lowestRatingLabel}:</span>
                           <span className="font-bold font-mono">
                             {record.summary.lowestRating !== null ? (
                               <span className="text-[#FF3B30]">{record.summary.lowestRating}★</span>
                             ) : (
-                              <span className="text-[#34C759]">{language === 'en' ? 'No items < threshold' : '未发现低于警戒值商品'}</span>
+                              <span className="text-[#34C759]">{t.noLowRatedFound}</span>
                             )}
                           </span>
                         </div>
 
                         <div className="flex items-center gap-1.5 font-medium">
-                          <span className="text-[#8E8E93]">{language === 'en' ? 'Total Scanned:' : '扫描商品总数：'}</span>
+                          <span className="text-[#8E8E93]">{t.totalScannedLabel}:</span>
                           <span className="font-bold text-[#1D1D1F] dark:text-[#F5F5F7] font-mono">
-                            {record.summary.totalScanned || 0} {language === 'en' ? 'items' : '个商品'}
+                            {record.summary.totalScanned || 0} {language === 'en' ? 'items' : language === 'zh-Hant' ? '個商品' : '个商品'}
                           </span>
                         </div>
 
                         <div className="flex items-center gap-1.5 font-medium">
-                          <span className="text-[#8E8E93]">{language === 'en' ? 'Below Threshold:' : '低于警戒值商品：'}</span>
+                          <span className="text-[#8E8E93]">{t.lowRatedItemsLabel}:</span>
                           <span className={`font-bold font-mono ${(record.summary.totalLowRated || 0) > 0 ? 'text-[#FF3B30]' : 'text-[#34C759]'}`}>
-                            {record.summary.totalLowRated || 0} {language === 'en' ? 'items' : '个'}
+                            {record.summary.totalLowRated || 0} {language === 'en' ? 'items' : language === 'zh-Hant' ? '個' : '个'}
                           </span>
                         </div>
                       </div>
@@ -503,7 +505,11 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                         onClick={() => toggleExpand(record.productId)}
                         className="text-xs font-semibold text-[#007AFF] hover:underline flex items-center gap-1 cursor-pointer"
                       >
-                        <span>{isExpanded ? (language === 'en' ? 'Hide Details' : '收起详细') : (language === 'en' ? 'View Low-Rated Items & Findings' : '展开低分商品列表与质量结论')}</span>
+                        <span>
+                          {isExpanded
+                            ? (language === 'en' ? 'Hide Details' : language === 'zh-Hant' ? '收起詳細' : '收起详细')
+                            : (language === 'en' ? 'View Low-Rated Items & Findings' : language === 'zh-Hant' ? '展開低分商品列表與質量結論' : '展开低分商品列表与质量结论')}
+                        </span>
                         {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                       </button>
                     </div>
@@ -517,30 +523,40 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-bold text-[#1D1D1F] dark:text-[#F5F5F7] flex items-center gap-1.5">
                             <AlertTriangle className="h-4 w-4 text-[#FF3B30]" />
-                            <span>{language === 'en' ? 'Low-Rated Items Details (< Threshold):' : '低于警戒值商品详细列表（真实数据逐一核对）：'}</span>
+                            <span>
+                              {language === 'en'
+                                ? 'Low-Rated Items Details (< Threshold):'
+                                : language === 'zh-Hant'
+                                ? '低於警戒值商品詳細列表（真實數據逐一核對）：'
+                                : '低于警戒值商品详细列表（真实数据逐一核对）：'}
+                            </span>
                           </span>
                           <span className="text-[11px] text-[#8E8E93]">
-                            {completedPlats.flatMap((p) => record.platformResults[p]?.lowRatedItems || []).length} {language === 'en' ? 'items found' : '个低分商品'}
+                            {completedPlats.flatMap((p) => record.platformResults[p]?.lowRatedItems || []).length} {language === 'en' ? 'items found' : language === 'zh-Hant' ? '個低分商品' : '个低分商品'}
                           </span>
                         </div>
 
                         {completedPlats.flatMap((p) => record.platformResults[p]?.lowRatedItems || []).length === 0 ? (
                           <div className="p-4 rounded-lg bg-white dark:bg-[#1C1C1E] border border-neutral-200 dark:border-neutral-700 text-center text-[#34C759] font-medium">
-                            {language === 'en' ? 'No items below threshold detected in this product history snapshot.' : '未发现低于警戒值的商品，所有已扫描商品评分均达到或高于警戒基准。'}
+                            {language === 'en'
+                              ? 'No items below threshold detected in this product history snapshot.'
+                              : language === 'zh-Hant'
+                              ? '未發現低於警戒值的商品，所有已掃描商品評分均達到或高於警戒基準。'
+                              : '未发现低于警戒值的商品，所有已扫描商品评分均达到或高于警戒基准。'}
                           </div>
                         ) : (
                           <div className="overflow-x-auto rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-[#1C1C1E]">
                             <table className="w-full text-left border-collapse text-xs">
                               <thead>
                                 <tr className="border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 text-[10px] font-semibold text-[#8E8E93] uppercase">
-                                  <th className="py-2.5 px-3">{language === 'en' ? 'Image' : '商品图片'}</th>
-                                  <th className="py-2.5 px-3">{language === 'en' ? 'Product Title' : '商品标题'}</th>
-                                  <th className="py-2.5 px-2.5">{language === 'en' ? 'Price' : '价格'}</th>
-                                  <th className="py-2.5 px-2.5">{language === 'en' ? 'Channel' : '渠道'}</th>
-                                  <th className="py-2.5 px-2.5">{language === 'en' ? 'SKU / Identifiers' : '商品标识'}</th>
-                                  <th className="py-2.5 px-2.5 text-right">{language === 'en' ? 'Rating' : '评分'}</th>
-                                  <th className="py-2.5 px-2.5 text-right">{language === 'en' ? 'Reviews' : '评论数'}</th>
-                                  <th className="py-2.5 px-3 text-right">{language === 'en' ? 'Action' : '操作'}</th>
+                                  <th className="py-2.5 px-3">{language === 'en' ? 'Image' : language === 'zh-Hant' ? '商品圖片' : '商品图片'}</th>
+                                  <th className="py-2.5 px-3">{t.colProduct}</th>
+                                  <th className="py-2.5 px-2.5">{language === 'en' ? 'Price' : language === 'zh-Hant' ? '價格' : '价格'}</th>
+                                  <th className="py-2.5 px-2.5">{t.colPlatform}</th>
+                                  <th className="py-2.5 px-2.5">{t.colIdentifiers}</th>
+                                  <th className="py-2.5 px-2.5 text-right">{t.colRating}</th>
+                                  <th className="py-2.5 px-2.5 text-right">{t.colReviews}</th>
+                                  <th className="py-2.5 px-3 text-right">{t.colActions}</th>
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
@@ -586,7 +602,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                                         {it.rating}★
                                       </td>
                                       <td className="py-2 px-2.5 text-right font-mono text-neutral-600 dark:text-neutral-400 whitespace-nowrap">
-                                        {it.reviewCount != null ? `${it.reviewCount} ${language === 'en' ? 'revs' : '条'}` : '—'}
+                                        {it.reviewCount != null ? `${it.reviewCount} ${language === 'en' ? 'revs' : language === 'zh-Hant' ? '條' : '条'}` : '—'}
                                       </td>
                                       <td className="py-2 px-3 text-right whitespace-nowrap">
                                         {it.productUrl && (
@@ -596,7 +612,7 @@ export const HistoryView: React.FC<HistoryViewProps> = ({
                                             rel="noreferrer"
                                             className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-white bg-[#007AFF] hover:bg-[#0062CC] rounded-lg transition-colors shadow-2xs"
                                           >
-                                            <span>{language === 'en' ? 'Open' : '打开商品页面'}</span>
+                                            <span>{t.btnOpenPage}</span>
                                             <ExternalLink className="h-3 w-3" />
                                           </a>
                                         )}

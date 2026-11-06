@@ -154,7 +154,7 @@ export const SearchScanView: React.FC<SearchScanViewProps> = ({
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#007AFF] text-white">
-                  {language === 'en' ? 'Active Product Session' : '当前产品查询会话'}
+                  {t.activeSessionBadge}
                 </span>
                 <span className="text-sm font-bold text-[#1D1D1F] dark:text-[#F5F5F7]">
                   {currentSession.productName}
@@ -192,7 +192,7 @@ export const SearchScanView: React.FC<SearchScanViewProps> = ({
                   </span>
                 )}
                 <span>
-                  · {language === 'en' ? 'Multi-channel cross-platform synthesis' : '跨平台数据持续累积中'}
+                  · {language === 'en' ? 'Multi-channel cross-platform synthesis' : language === 'zh-Hant' ? '跨平台數據持續累積中' : '跨平台数据持续累积中'}
                 </span>
               </div>
             </div>
@@ -211,23 +211,23 @@ export const SearchScanView: React.FC<SearchScanViewProps> = ({
           {/* Cross-Platform Summary Status Strip (Requirement 6) */}
           <div className="flex flex-wrap items-center gap-3 py-2 px-3 bg-white/70 dark:bg-black/20 rounded-xl border border-[#007AFF]/20 text-xs">
             <span className="font-semibold text-neutral-800 dark:text-neutral-200">
-              {language === 'en' ? 'Queried' : '已查询'}: <b className="text-[#007AFF] font-mono">{Object.keys(currentSession.platformResults || {}).length} / 7</b> {language === 'en' ? 'platforms' : '个平台'}
+              {language === 'en' ? 'Queried' : language === 'zh-Hant' ? '已查詢' : '已查询'}: <b className="text-[#007AFF] font-mono">{Object.keys(currentSession.platformResults || {}).length} / 7</b> {language === 'en' ? 'platforms' : language === 'zh-Hant' ? '個平台' : '个平台'}
             </span>
             <span className="text-[#8E8E93]">·</span>
             <span className="text-neutral-700 dark:text-neutral-300">
-              {language === 'en' ? 'Total Scanned' : '共扫描'}: <b className="font-mono">{currentSession.summary?.totalScanned ?? products.length}</b> {language === 'en' ? 'items' : '个商品'}
+              {language === 'en' ? 'Total Scanned' : language === 'zh-Hant' ? '共掃描' : '共扫描'}: <b className="font-mono">{currentSession.summary?.totalScanned ?? products.length}</b> {language === 'en' ? 'items' : language === 'zh-Hant' ? '個商品' : '个商品'}
             </span>
             <span className="text-[#8E8E93]">·</span>
             <span className="text-neutral-700 dark:text-neutral-300">
-              {language === 'en' ? 'Below Threshold' : '低分商品'}: <b className={`font-mono ${(currentSession.summary?.totalLowRated ?? lowRatedProducts.length) > 0 ? 'text-[#FF3B30]' : 'text-[#34C759]'}`}>{currentSession.summary?.totalLowRated ?? lowRatedProducts.length}</b> {language === 'en' ? 'items' : '个'}
+              {t.lowRatedItemsLabel}: <b className={`font-mono ${(currentSession.summary?.totalLowRated ?? lowRatedProducts.length) > 0 ? 'text-[#FF3B30]' : 'text-[#34C759]'}`}>{currentSession.summary?.totalLowRated ?? lowRatedProducts.length}</b> {language === 'en' ? 'items' : language === 'zh-Hant' ? '個' : '个'}
             </span>
             <span className="text-[#8E8E93]">·</span>
             <span className="text-neutral-700 dark:text-neutral-300">
-              {language === 'en' ? 'Lowest Rating' : '全部平台中的最低评分'}:{' '}
+              {t.lowestRatingLabel}:{' '}
               {currentSession.summary?.lowestRating != null ? (
                 <b className="font-mono text-[#FF3B30]">{currentSession.summary.lowestRating}★</b>
               ) : (
-                <span className="text-[#34C759] font-medium">{language === 'en' ? 'No items below threshold' : '未发现低于警戒值的商品'}</span>
+                <span className="text-[#34C759] font-medium">{t.noLowRatedFound}</span>
               )}
             </span>
           </div>
@@ -878,6 +878,7 @@ export const SearchScanView: React.FC<SearchScanViewProps> = ({
               allProducts={products}
               threshold={threshold}
               onSelectGroup={onSelectGroup}
+              language={language}
             />
           )}
 

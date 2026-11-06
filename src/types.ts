@@ -172,7 +172,7 @@ export interface ScanPayload {
   error?: string;
 }
 
-export type Language = 'en' | 'zh-CN' | 'zh-TW';
+export type Language = 'en' | 'zh-CN' | 'zh-Hant';
 
 export interface SearchHistoryRecord {
   id: string;

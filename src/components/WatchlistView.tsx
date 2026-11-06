@@ -12,17 +12,21 @@ import {
   FileSpreadsheet,
   AlertCircle
 } from 'lucide-react';
-import { WatchlistItem, SkuValidationStatus } from '../types';
+import { WatchlistItem, SkuValidationStatus, Language } from '../types';
+import { getTranslation } from '../services/i18n';
 
 interface WatchlistViewProps {
   watchlist: WatchlistItem[];
   onUpdateWatchlist: (items: WatchlistItem[]) => void;
+  language?: Language;
 }
 
 export const WatchlistView: React.FC<WatchlistViewProps> = ({
   watchlist,
-  onUpdateWatchlist
+  onUpdateWatchlist,
+  language = 'en'
 }) => {
+  const t = getTranslation(language);
   const [searchQuery, setSearchQuery] = useState('');
   const [showBulkAddModal, setShowBulkAddModal] = useState(false);
   const [bulkText, setBulkText] = useState('');
@@ -147,10 +151,10 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-page-title text-[#1D1D1F] dark:text-[#F5F5F7]">
-            Watchlist Management
+            {t.watchlistTitle}
           </h1>
           <p className="text-body text-[#8E8E93] mt-1">
-            Maintain critical product catalogs, cross-platform barcode references, and automated synchronization.
+            {t.watchlistSubtitle}
           </p>
         </div>
 
@@ -158,26 +162,26 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
           {/* Bulk Add Button */}
           <button
             onClick={() => setShowBulkAddModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-[#007AFF] hover:bg-[#0062CC] rounded-xl transition-colors shadow-2xs whitespace-nowrap"
+            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-[#007AFF] hover:bg-[#0062CC] rounded-xl transition-colors shadow-2xs whitespace-nowrap cursor-pointer"
           >
             <Plus className="h-3.5 w-3.5" />
-            <span>Bulk Add SKUs</span>
+            <span>{t.btnAddSku}</span>
           </button>
 
           {/* Import CSV */}
           <label className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#1D1D1F] bg-[#FFFFFF] border border-[#E5E5EA] hover:bg-[#F2F2F7] dark:bg-[#1C1C1E] dark:border-[#2C2C2E] dark:text-[#F5F5F7] rounded-xl transition-colors cursor-pointer whitespace-nowrap">
             <Upload className="h-3.5 w-3.5 text-[#007AFF]" />
-            <span>Import CSV</span>
+            <span>{t.btnImportCsv}</span>
             <input type="file" accept=".csv,.txt" onChange={handleImportFile} className="hidden" />
           </label>
 
           {/* Export CSV */}
           <button
             onClick={handleExportCsv}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#1D1D1F] bg-[#FFFFFF] border border-[#E5E5EA] hover:bg-[#F2F2F7] dark:bg-[#1C1C1E] dark:border-[#2C2C2E] dark:text-[#F5F5F7] rounded-xl transition-colors whitespace-nowrap"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#1D1D1F] bg-[#FFFFFF] border border-[#E5E5EA] hover:bg-[#F2F2F7] dark:bg-[#1C1C1E] dark:border-[#2C2C2E] dark:text-[#F5F5F7] rounded-xl transition-colors whitespace-nowrap cursor-pointer"
           >
             <Download className="h-3.5 w-3.5 text-[#007AFF]" />
-            <span>Export CSV</span>
+            <span>{t.btnExportCsv}</span>
           </button>
         </div>
       </div>
@@ -190,7 +194,7 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#8E8E93]" />
             <input
               type="text"
-              placeholder="Search watchlist by Name, UPC, Model, ASIN..."
+              placeholder={language === 'en' ? 'Search watchlist by Name, UPC, Model, ASIN...' : '按产品名称、UPC、型号、ASIN搜索...'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-64 sm:w-80 rounded-lg border border-[#E5E5EA] bg-[#F2F2F7] py-1.5 pl-9 pr-3 text-xs dark:border-[#3A3A3C] dark:bg-[#2C2C2E] dark:text-[#F5F5F7] focus:outline-none focus:border-[#007AFF]"
@@ -198,7 +202,9 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
           </div>
 
           <div className="text-xs text-[#8E8E93] font-mono tabular-nums">
-            Showing {filtered.length} of {watchlist.length} monitored SKUs
+            {language === 'en'
+              ? `Showing ${filtered.length} of ${watchlist.length} monitored SKUs`
+              : `展示 ${filtered.length} / ${watchlist.length} 个监控SKU`}
           </div>
         </div>
 
@@ -207,22 +213,24 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-[#E5E5EA] dark:border-[#2C2C2E] text-[11px] font-semibold text-[#8E8E93] uppercase">
-                <th className="py-3 px-4 min-w-[220px]">Product Name</th>
+                <th className="py-3 px-4 min-w-[220px]">{t.colProduct}</th>
                 <th className="py-3 px-3 min-w-[130px]">UPC</th>
-                <th className="py-3 px-3 min-w-[100px]">Model #</th>
+                <th className="py-3 px-3 min-w-[100px]">{language === 'en' ? 'Model #' : '型号'}</th>
                 <th className="py-3 px-3 min-w-[110px]">Walmart #</th>
                 <th className="py-3 px-3 min-w-[100px]">TCIN</th>
                 <th className="py-3 px-3 min-w-[110px]">ASIN</th>
-                <th className="py-3 px-3 min-w-[100px]">Status</th>
-                <th className="py-3 px-3 min-w-[110px]">Match Source</th>
-                <th className="py-3 px-4 text-right min-w-[100px]">Actions</th>
+                <th className="py-3 px-3 min-w-[100px]">{t.colStatus}</th>
+                <th className="py-3 px-3 min-w-[110px]">{language === 'en' ? 'Match Source' : '匹配来源'}</th>
+                <th className="py-3 px-4 text-right min-w-[100px]">{t.colActions}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E5E5EA] dark:divide-[#2C2C2E]">
               {filtered.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="py-12 text-center text-[#8E8E93]">
-                    No monitored SKUs match your query. Click &ldquo;Bulk Add SKUs&rdquo; or &ldquo;Import CSV&rdquo; to add products.
+                    {language === 'en'
+                      ? 'No monitored SKUs match your query. Click "Bulk Add SKUs" or "Import CSV" to add products.'
+                      : '没有符合条件的监控SKU。点击“批量添加SKU”或“导入CSV”录入监控产品。'}
                   </td>
                 </tr>
               ) : (
@@ -365,18 +373,21 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
           <div className="w-full max-w-xl rounded-2xl bg-white dark:bg-[#1C1C1E] border border-[#E5E5EA] dark:border-[#2C2C2E] p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-[#E5E5EA] dark:border-[#2C2C2E] pb-3">
               <h2 className="text-module-title text-[#1D1D1F] dark:text-[#F5F5F7]">
-                Bulk Add Monitored SKUs
+                {language === 'en' ? 'Bulk Add Monitored SKUs' : '批量添加监控SKU'}
               </h2>
               <button
                 onClick={() => setShowBulkAddModal(false)}
-                className="p-1 text-[#8E8E93] hover:text-[#1D1D1F] rounded"
+                className="p-1 text-[#8E8E93] hover:text-[#1D1D1F] rounded cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <p className="text-xs text-[#8E8E93] leading-relaxed">
-              Paste lines directly from Excel or CSV. Format: <code className="font-mono text-[#1D1D1F] dark:text-[#F5F5F7]">Name | UPC | Model | WM# | TCIN | ASIN</code>.
+              {language === 'en'
+                ? 'Paste lines directly from Excel or CSV. Format: '
+                : '可直接从 Excel 或 CSV 复制并粘贴多行。数据格式：'}
+              <code className="font-mono text-[#1D1D1F] dark:text-[#F5F5F7]">Name | UPC | Model | WM# | TCIN | ASIN</code>
             </p>
 
             <textarea
@@ -390,15 +401,15 @@ export const WatchlistView: React.FC<WatchlistViewProps> = ({
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 onClick={() => setShowBulkAddModal(false)}
-                className="px-4 py-2 text-xs font-medium text-[#8E8E93] hover:text-[#1D1D1F]"
+                className="px-4 py-2 text-xs font-medium text-[#8E8E93] hover:text-[#1D1D1F] cursor-pointer"
               >
-                Cancel
+                {t.btnCancel}
               </button>
               <button
                 onClick={() => handleParseAndAdd(bulkText)}
-                className="px-4 py-2 text-xs font-semibold text-white bg-[#007AFF] hover:bg-[#0062CC] rounded-xl shadow-2xs"
+                className="px-4 py-2 text-xs font-semibold text-white bg-[#007AFF] hover:bg-[#0062CC] rounded-xl shadow-2xs cursor-pointer"
               >
-                Add Items to Watchlist
+                {language === 'en' ? 'Add Items to Watchlist' : '添加至关注产品库'}
               </button>
             </div>
           </div>

@@ -162,14 +162,14 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-[#007AFF]" />
                 <h2 className="text-module-title text-[#1D1D1F] dark:text-[#F5F5F7]">
-                  {language === 'en' ? 'Completed Products in History' : '历史已归档产品'}
+                  {t.completedHistoryTitle}
                 </h2>
               </div>
               <button
                 onClick={() => onNavigateSection('history')}
                 className="text-xs font-semibold text-[#007AFF] hover:underline flex items-center gap-1"
               >
-                <span>View All ({productHistory.length})</span>
+                <span>{t.viewAll} ({productHistory.length})</span>
                 <ChevronRight className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -188,20 +188,20 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
                           {record.productName}
                         </span>
                         <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-[#F2F2F7] dark:bg-[#2C2C2E] text-[#1D1D1F] dark:text-[#F5F5F7]">
-                          {plats.length} {language === 'en' ? 'platform(s)' : '个平台'}
+                          {plats.length} {language === 'en' ? 'platforms' : language === 'zh-Hant' ? '個通路' : '个平台'}
                         </span>
                         {record.summary?.lowestRating !== null && record.summary?.lowestRating !== undefined ? (
                           <span className="text-[11px] font-bold text-[#FF3B30] font-mono">
-                            {language === 'en' ? 'Lowest' : '最低'}: {record.summary.lowestRating}★
+                            {t.lowestRatingLabel}: {record.summary.lowestRating}★
                           </span>
                         ) : (
                           <span className="text-[11px] font-semibold text-[#34C759]">
-                            {language === 'en' ? 'Compliant' : '合格'}
+                            {t.statusCompliant}
                           </span>
                         )}
                       </div>
                       <div className="text-[11px] text-[#8E8E93] font-mono">
-                        {record.updatedAt || record.startedAt} · {record.summary?.totalScanned || 0} {language === 'en' ? 'scanned items' : '个已扫商品'} · {record.summary?.totalLowRated || 0} {language === 'en' ? 'below threshold' : '个低分'}
+                        {record.updatedAt || record.startedAt} · {record.summary?.totalScanned || 0} {t.scannedItemsCount} · {record.summary?.totalLowRated || 0} {t.lowRatedItemsLabel}
                       </div>
                     </div>
 
@@ -210,7 +210,7 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
                       className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-[#007AFF] bg-[#007AFF]/10 hover:bg-[#007AFF]/15 rounded-lg transition-colors cursor-pointer"
                     >
                       <FolderOpen className="h-3.5 w-3.5" />
-                      <span>{t.btnRestoreProduct || 'Restore'}</span>
+                      <span>{t.btnRestoreProduct}</span>
                     </button>
                   </div>
                 );
@@ -289,7 +289,7 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
               onClick={() => onNavigateSection('search-scan')}
               className="flex items-center gap-1 px-3 py-2 text-xs font-medium text-[#007AFF] bg-[#007AFF]/10 hover:bg-[#007AFF]/15 rounded-xl transition-colors cursor-pointer whitespace-nowrap"
             >
-              <span>{language === 'en' ? 'Scan Next Channel' : '查询更多平台'}</span>
+              <span>{t.scanNextChannel}</span>
               <ArrowRight className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -321,6 +321,7 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
         onCopyEmailTable={onCopyEmailTable}
         onRefresh={() => {}}
         onClear={() => {}}
+        language={language}
       />
 
       {/* 4. Split Layout: Cross-Platform Matrix (All 7 Channels) & History Snapshot */}
@@ -331,14 +332,14 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
             <div className="flex items-center gap-2">
               <Layers className="h-4 w-4 text-[#007AFF]" />
               <h2 className="text-module-title text-[#1D1D1F] dark:text-[#F5F5F7]">
-                {t.tabCrossPlatform} ({completedPlats.length} / {PLAT_ORDER.length} {language === 'en' ? 'Channels' : '平台'})
+                {t.tabCrossPlatform} ({completedPlats.length} / {PLAT_ORDER.length} {language === 'en' ? 'Channels' : language === 'zh-Hant' ? '個通路' : '个平台'})
               </h2>
             </div>
             <button
               onClick={() => onNavigateSection('search-scan')}
               className="text-xs font-semibold text-[#007AFF] hover:underline flex items-center gap-1"
             >
-              <span>{language === 'en' ? 'Open Scan Studio' : '进入扫描工作室'}</span>
+              <span>{t.openStudio}</span>
               <ChevronRight className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -348,13 +349,13 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="border-b border-[#E5E5EA] dark:border-[#2C2C2E] text-[11px] font-semibold text-[#8E8E93]">
-                  <th className="py-2.5 px-3">{language === 'en' ? 'Monitored Channel' : '监控渠道'}</th>
-                  <th className="py-2.5 px-3">{language === 'en' ? 'Status' : '状态'}</th>
-                  <th className="py-2.5 px-3 text-right">{language === 'en' ? 'Total Scanned' : '扫描商品总数'}</th>
-                  <th className="py-2.5 px-3 text-right">{language === 'en' ? `Below ${threshold.toFixed(1)}` : `低于${threshold.toFixed(1)}`}</th>
-                  <th className="py-2.5 px-3 text-right">{language === 'en' ? 'Lowest Rating' : '最低评分'}</th>
-                  <th className="py-2.5 px-3 text-right">{language === 'en' ? 'Query Time' : '查询时间'}</th>
-                  <th className="py-2.5 px-3 text-right">{language === 'en' ? 'Actions' : '操作'}</th>
+                  <th className="py-2.5 px-3">{t.colChannel}</th>
+                  <th className="py-2.5 px-3">{t.colStatus}</th>
+                  <th className="py-2.5 px-3 text-right">{t.totalScannedLabel}</th>
+                  <th className="py-2.5 px-3 text-right">{t.belowThresholdLabel} &lt; {threshold.toFixed(1)}</th>
+                  <th className="py-2.5 px-3 text-right">{t.lowestRatingLabel}</th>
+                  <th className="py-2.5 px-3 text-right">{t.queryTimeLabel}</th>
+                  <th className="py-2.5 px-3 text-right">{t.actionsLabel}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E5E5EA] dark:divide-[#2C2C2E]">
@@ -379,18 +380,18 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
                       <td className="py-3 px-3">
                         {isScanned ? (
                           <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                            {t.statusCompleted || '已完成'}
+                            {t.statusCompleted}
                           </span>
                         ) : (
                           <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-neutral-100 dark:bg-neutral-800 text-[#8E8E93]">
-                            {t.statusNotScanned || '未查询'}
+                            {t.statusNotScanned}
                           </span>
                         )}
                       </td>
                       <td className="py-3 px-3 text-right font-mono">
                         {isScanned ? (
                           <span className="font-semibold text-neutral-800 dark:text-neutral-200">
-                            {total} {language === 'en' ? 'items' : '个商品'}
+                            {total} {t.itemsWord}
                           </span>
                         ) : (
                           <span className="text-[#8E8E93]">—</span>
@@ -399,7 +400,7 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
                       <td className="py-3 px-3 text-right font-mono">
                         {isScanned ? (
                           <span className={lowCount > 0 ? 'text-[#FF3B30] font-bold' : 'text-emerald-600 dark:text-emerald-400 font-semibold'}>
-                            {lowCount} {language === 'en' ? 'items' : '个'}
+                            {lowCount} {t.itemsWord}
                           </span>
                         ) : (
                           <span className="text-[#8E8E93]">—</span>
@@ -411,7 +412,7 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
                             {lowest.toFixed(1)}★
                           </span>
                         ) : isScanned ? (
-                          <span className="text-[#34C759] text-[11px] font-normal">{language === 'en' ? 'No Low Rating' : '无低分'}</span>
+                          <span className="text-[#34C759] text-[11px] font-normal">{t.noLowRating}</span>
                         ) : (
                           <span className="text-[#8E8E93] font-normal">—</span>
                         )}
@@ -427,7 +428,7 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
                             rel="noreferrer"
                             className="inline-flex items-center gap-1 text-[#007AFF] hover:underline text-[11px]"
                           >
-                            <span>Open</span>
+                            <span>{t.openLink}</span>
                             <ExternalLink className="h-3 w-3" />
                           </a>
                         ) : (
@@ -435,7 +436,7 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
                             onClick={() => onNavigateSection('search-scan')}
                             className="text-[#007AFF] font-medium hover:underline text-[11px]"
                           >
-                            + Scan
+                            + {t.btnSearchScan}
                           </button>
                         )}
                       </td>
@@ -454,14 +455,14 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-[#007AFF]" />
                 <h2 className="text-module-title text-[#1D1D1F] dark:text-[#F5F5F7]">
-                  {language === 'en' ? 'Saved Products' : '已保存产品库'}
+                  {t.savedProductsLibrary}
                 </h2>
               </div>
               <button
                 onClick={() => onNavigateSection('history')}
                 className="text-xs font-semibold text-[#007AFF] hover:underline"
               >
-                All ({productHistory.length})
+                {t.viewAll} ({productHistory.length})
               </button>
             </div>
 
@@ -480,20 +481,20 @@ export const DashboardHomeView: React.FC<DashboardHomeViewProps> = ({
                         {p.productName}
                       </div>
                       <div className="text-[11px] text-[#8E8E93] font-mono">
-                        {pCount} platforms · {p.summary?.lowestRating != null ? `Lowest: ${p.summary.lowestRating}★` : (p.summary?.totalScanned ? `${p.summary.totalScanned} scanned` : '')}
+                        {pCount} {language === 'en' ? 'platforms' : language === 'zh-Hant' ? '個通路' : '个平台'} · {p.summary?.lowestRating != null ? `${t.lowestRatingLabel}: ${p.summary.lowestRating}★` : (p.summary?.totalScanned ? `${p.summary.totalScanned} ${t.itemsWord}` : '')}
                       </div>
                     </div>
 
                     {isSelected ? (
                       <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-[#007AFF]/10 text-[#007AFF]">
-                        Active
+                        {t.activeBadge}
                       </span>
                     ) : (
                       <button
                         onClick={() => onOpenProduct(p)}
                         className="px-2.5 py-1 text-[11px] font-medium text-[#007AFF] bg-[#007AFF]/10 hover:bg-[#007AFF]/15 rounded-lg transition-colors cursor-pointer shrink-0"
                       >
-                        Restore
+                        {t.restoreLink}
                       </button>
                     )}
                   </div>

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Mail, Check, RefreshCw, Trash2, SlidersHorizontal, Sparkles } from 'lucide-react';
-import { CrossPlatformGroup } from '../types';
+import { Mail, Check, RefreshCw, Trash2 } from 'lucide-react';
+import { CrossPlatformGroup, Language } from '../types';
 import { buildKeyFindings } from '../services/summaryService';
+import { getTranslation } from '../services/i18n';
 
 interface ExecutiveSummaryProps {
   groups: CrossPlatformGroup[];
@@ -12,6 +13,7 @@ interface ExecutiveSummaryProps {
   onCopyEmailTable: () => void;
   onRefresh: () => void;
   onClear: () => void;
+  language?: Language;
 }
 
 export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
@@ -22,10 +24,12 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
   onToggleFocusOnly,
   onCopyEmailTable,
   onRefresh,
-  onClear
+  onClear,
+  language = 'en'
 }) => {
   const [copied, setCopied] = useState(false);
-  const bullets = buildKeyFindings(groups, threshold, focusOnly);
+  const t = getTranslation(language);
+  const bullets = buildKeyFindings(groups, threshold, focusOnly, language);
 
   const handleCopy = () => {
     onCopyEmailTable();
@@ -38,10 +42,12 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-100 pb-3.5 dark:border-neutral-800">
         <div>
           <h2 className="text-sm font-semibold tracking-tight text-neutral-900 dark:text-white flex items-center gap-2">
-            <span>Executive Quality Summary &amp; Key Findings</span>
+            <span>{t.findingsTitle}</span>
           </h2>
           <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
-            Automated defect synthesis for QA bulletins, product review meetings, and executive reporting.
+            {language === 'en'
+              ? 'Automated defect synthesis for QA bulletins, product review meetings, and executive reporting.'
+              : '针对质量周报、产品评审会与管理层汇报的自动化缺陷归纳与关键结论。'}
           </p>
         </div>
 
@@ -49,7 +55,7 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Threshold Selector */}
           <div className="flex items-center gap-1.5 text-xs text-neutral-600 dark:text-neutral-300">
-            <span className="text-[11px] text-neutral-500">Threshold:</span>
+            <span className="text-[11px] text-neutral-500">{t.ratingThreshold}:</span>
             <input
               type="number"
               step="0.1"
@@ -69,7 +75,9 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
               onChange={(e) => onToggleFocusOnly(e.target.checked)}
               className="rounded border-neutral-300 text-neutral-900 focus:ring-0 dark:border-neutral-700 dark:bg-neutral-800"
             />
-            <span className="text-[11px]">Focus &lt; {threshold.toFixed(1)} only</span>
+            <span className="text-[11px]">
+              {language === 'en' ? `Focus < ${threshold.toFixed(1)} only` : `仅关注 < ${threshold.toFixed(1)}`}
+            </span>
           </label>
 
           <div className="h-4 w-px bg-neutral-200 dark:bg-neutral-700" />
@@ -77,24 +85,24 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
           {/* Copy Button */}
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1.5 rounded-md bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-100 transition-colors shadow-2xs whitespace-nowrap"
+            className="flex items-center gap-1.5 rounded-md bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-100 transition-colors shadow-2xs whitespace-nowrap cursor-pointer"
           >
             {copied ? <Check className="h-3.5 w-3.5 text-emerald-400 dark:text-emerald-600" /> : <Mail className="h-3.5 w-3.5" />}
-            <span>{copied ? 'Copied to Clipboard' : 'Copy as Email Table'}</span>
+            <span>{copied ? (language === 'en' ? 'Copied to Clipboard' : '已复制到剪贴板') : t.btnCopyEmailTable}</span>
           </button>
 
           {/* Refresh & Clear */}
           <button
             onClick={onRefresh}
-            title="Refresh summary from latest scans"
-            className="p-1.5 text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white rounded hover:bg-neutral-100 dark:hover:bg-neutral-800"
+            title={language === 'en' ? 'Refresh summary from latest scans' : '刷新结论'}
+            className="p-1.5 text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer"
           >
             <RefreshCw className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={onClear}
-            title="Clear tracked products summary"
-            className="p-1.5 text-neutral-500 hover:text-red-600 dark:text-neutral-400 dark:hover:text-red-400 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800"
+            title={language === 'en' ? 'Clear tracked products summary' : '清空当前结论'}
+            className="p-1.5 text-neutral-500 hover:text-red-600 dark:text-neutral-400 dark:hover:text-red-400 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
@@ -115,10 +123,14 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
 
       <div className="mt-3.5 flex items-center justify-between border-t border-neutral-100 pt-2.5 text-[11px] text-neutral-400 dark:border-neutral-800">
         <span>
-          {groups.length} total product families tracked across retail portals
+          {language === 'en'
+            ? `${groups.length} total product families tracked across retail portals`
+            : `当前追踪 ${groups.length} 个跨渠道商品系列`}
         </span>
         <span>
-          Format ready for direct paste into Outlook, Teams, or Gmail
+          {language === 'en'
+            ? 'Format ready for direct paste into Outlook, Teams, or Gmail'
+            : '格式已就绪，可直接粘贴至 Outlook、Teams 或 Gmail 邮件'}
         </span>
       </div>
     </div>

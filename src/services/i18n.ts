@@ -1,781 +1,288 @@
 import { Language } from '../types';
+import enDict from '../locales/en.json';
+import zhCnDict from '../locales/zh-CN.json';
+import zhHantDict from '../locales/zh-Hant.json';
 
-export const TRANSLATIONS = {
-  en: {
-    // Brand & App
-    appName: 'MGA Quality Sentinel',
-    appSubtitle: 'Quality Monitoring Dashboard',
-    tagline: 'Quality Monitoring Dashboard',
-    lastScan: 'Last Scan',
-    today: 'Today',
-    connected: 'Extension Connected',
-    localMode: 'Local-First Mode',
-    manifest: 'Manifest V3 Chromium',
-    privateIsolation: 'Private Storage · User Isolated',
-
-    // 5 Navigation Sections
-    navDashboard: 'Dashboard',
-    navSearchScan: 'Search & Scan',
-    navWatchlist: 'Watchlist',
-    navHistory: 'History',
-    navSettings: 'Settings',
-
-    // Header buttons
-    btnNewProductSearch: 'New Product Search',
-    btnScanCurrent: 'Scan Current Page',
-    btnSearchScan: 'Search & Scan',
-    btnDeepAnalyze: 'Deep Analyze',
-    btnRefresh: 'Refresh Dashboard',
-    btnInstallExt: 'Install Extension',
-    btnEmailTable: 'Email Table',
-
-    // New Product Search Confirmation Modal & Platform Status
-    confirmNewProductTitle: 'Start New Product Query?',
-    confirmNewProductDesc: 'The current product results will be saved to History, and the current workspace will be cleared.',
-    btnSaveAndStartNew: 'Save & Start New Query',
-    statusNotScanned: 'Not Scanned',
-    statusCompleted: 'Completed',
-    btnContinueNextPlatform: 'Continue Next Platform',
-    btnRescanPlatform: 'Re-scan Platform',
-    btnDeletePlatform: 'Delete Platform Data',
-    btnRestoreProduct: 'Restore to Workspace',
-    activeSessionTitle: 'Active Product Session',
-    activeSessionBadge: 'Active Product',
-    switchProductPrompt: 'Switching Product Session',
-    unqueriedPlatforms: 'Unqueried Platforms',
-    queriedPlatforms: 'Queried Platforms',
-
-    // Language dropdown
-    langSelect: 'Language',
-    langEn: 'English',
-    langZhCn: '简体中文',
-    langZhTw: '繁體中文',
-
-    // Search & Scan Controls
-    searchKeywordLabel: 'Product Keyword or Brand',
-    searchKeywordPlaceholder: 'e.g. Mini Verse, Bratz, Little Tikes, Rainbow High...',
-    platformLabel: 'Retail Platform',
-    allPlatforms: 'All Supported Platforms',
-    ratingThreshold: 'Alert Threshold',
-    maxResults: 'Max Results',
-    includeReviews: 'Include Deep Reviews (Crawl customer comments for low-rated products)',
-    btnStartSearchScan: 'Search & Scan',
-    btnScanning: 'Scanning...',
-    btnStopScan: 'Cancel / Stop',
-    scanStatusIdle: 'Ready to search and scan retail listings.',
-    scanStatusOpening: 'Opening retail search portal in browser...',
-    scanStatusLoading: 'Waiting for retailer DOM to render...',
-    scanStatusInjecting: 'Connecting with content scripts and catalog parsers...',
-    scanStatusScanning: 'Extracting product listings, ratings, and UPC barcodes...',
-    scanStatusCrawlingReviews: 'Deep crawling customer reviews for low-rated products...',
-    scanStatusCompleted: 'Scan completed successfully!',
-    scanStatusCancelled: 'Scan operation was cancelled.',
-
-    // Empty States
-    emptyDashboardTitle: 'No Scan Data Loaded',
-    emptyDashboardDesc: 'Start by running a Search & Scan for your target product family or scan the active retailer tab.',
-    btnGoToSearchScan: 'Go to Search & Scan',
-    emptySearchScanTitle: 'Ready to Search & Scan',
-    emptySearchScanDesc: 'Enter a search term and select a retailer platform to extract ratings, complaints, and defect patterns.',
-    emptyHistoryTitle: 'No Search History Found',
-    emptyHistoryDesc: 'Completed queries and full recoverable analysis records will be saved here.',
-
-    // Search Results Area
-    resultsTitle: 'Search & Scan Results',
-    resultsSubtitle: 'Multi-channel product ratings, complaint classifications, and quality risk synthesis.',
-    tabOverview: 'Products Overview',
-    tabCrossPlatform: 'Cross-Platform Matrix',
-    tabComplaints: 'Complaint Classification',
-    tabDeepReview: 'Deep Reviews',
-    tabTrends: 'Trend Tracking',
-    tabSkuValidation: 'SKU Validation',
-    tabExports: 'Export Hub',
-    btnRescan: 'Re-Scan Catalog',
-    btnExportExcel: 'Export Excel (.xls)',
-    btnExportCsv: 'Export CSV',
-    btnCopyEmailTable: 'Copy Email Table',
-    btnDeepAnalyzeAll: 'Deep Analyze Low-Rated',
-
-    // Product Card / List
-    colProduct: 'Product',
-    colPlatform: 'Platform',
-    colIdentifiers: 'UPC / Model / IDs',
-    colRating: 'Rating',
-    colReviews: 'Reviews',
-    colAlertStatus: 'Quality Status',
-    colIssues: 'Main Issue',
-    colActions: 'Actions',
-    statusAlert: 'ALERT',
-    statusPass: 'PASS',
-    statusManual: 'MANUAL',
-
-    // History Page
-    historyTitle: 'Personal Search History',
-    historySubtitle: 'Locally stored queries with full recoverable results. Re-open past analyses without re-scanning.',
-    searchHistoryPlaceholder: 'Filter search history by keyword...',
-    filterByPlatform: 'Filter by Platform',
-    sortBy: 'Sort by',
-    sortNewest: 'Newest First',
-    sortOldest: 'Oldest First',
-    sortItemsHigh: 'Most Products Found',
-    sortRatingLow: 'Lowest Rating First',
-    btnOpenResult: 'Open Analysis',
-    btnDelete: 'Delete',
-    btnDeleteSelected: 'Delete Selected',
-    btnClearAll: 'Clear All History',
-    confirmDeleteOne: 'Are you sure you want to delete this search record?',
-    confirmDeleteBatch: 'Are you sure you want to delete the selected search records?',
-    confirmClearAll: 'Are you sure you want to delete all your personal search history?',
-    btnConfirmDelete: 'Delete',
-    btnCancel: 'Cancel',
-    selectedRecords: 'records selected',
-
-    // KPI Cards
-    kpiWatchlist: 'Watchlist',
-    kpiTrackedSkus: 'Tracked SKUs',
-    kpiLowRating: 'Low-Rated Items',
-    kpiBelowThreshold: 'Items <',
-    kpiPlatforms: 'Monitored Channels',
-    kpiPlatformCoverage: 'WM · AMZ · Target · Costco',
-    kpiAlerts: 'Lowest Rating',
-    kpiActiveExceptions: 'Across All Channels',
-    kpiTotalScanned: 'Total Products Scanned',
-    kpiTotalScannedSubtitle: 'Across monitored platforms',
-    lowestRatingLabel: 'Lowest Rating',
-    totalScannedLabel: 'Total Scanned',
-    lowRatedCountLabel: 'Below Threshold',
-    noLowRatedFound: 'No items below threshold',
-    openProductPage: 'Open Product Page',
-    lowRatedItemsTitle: 'Low-Rated Products (< Threshold)',
-    scannedItemsCount: 'Scanned',
-    itemsWord: 'items',
-
-    // Alert Center
-    alertCenterTitle: 'Alert Center — Products Below Threshold',
-    alertCenterSubtitle: 'Immediate QA action required · Benchmark threshold: <',
-    alertCritical: 'Critical',
-    alertViewAll: 'View All Defect Alerts',
-    alertBelowOn: 'Below threshold on:',
-    alertLowest: 'Lowest Rating',
-    alertOn: 'on',
-    alertCompliant: 'All monitored products meet or exceed the benchmark.',
-    alertNoBreaches: 'No active quality breaches detected across Walmart, Amazon, and Target.',
-
-    // Executive Summary
-    execSummaryTitle: 'Executive Quality Summary & Key Findings',
-    execSummarySubtitle: 'Automated defect synthesis for QA bulletins, review meetings, and executive reporting.',
-    thresholdLabel: 'Threshold:',
-    focusBelowOnly: 'Focus < threshold only',
-    copyEmailTable: 'Copy as Email Table',
-    copiedClipboard: 'Copied to Clipboard!',
-    totalFamiliesTracked: 'total product families tracked across retail portals',
-    formatReadyOutlook: 'Format ready for direct paste into Outlook, Teams, or Gmail',
-
-    // Cross Platform Matrix
-    searchPlaceholder: 'Search product name, UPC, or model...',
-    filterAll: 'All',
-    filterBelow: 'Below Benchmark',
-    filterCompliant: 'Compliant',
-    exportCsv: 'Export CSV',
-    colProductIdent: 'Product Identification',
-    colBreachedChannels: 'Channels < Threshold',
-    colStatus: 'Status',
-    colDetails: 'Details',
-    showingGroups: 'Showing',
-    ofGroups: 'of',
-    groupedLines: 'grouped product lines',
-    seriesGuardNotice: 'Cross-platform series conflict prevention active · Ratings strictly checked against threshold',
-
-    // Complaint Analytics
-    complaintAnalyticsTitle: 'Complaint Analytics',
-    complaintAnalyticsSubtitle: 'Quantify defect distribution, proportion share, and channel fault patterns across consumer complaints.',
-    viewBarChart: 'Bar Chart',
-    viewProportion: 'Proportion Share',
-    viewHeatmap: 'Channel Heatmap',
-    colCategory: 'Category',
-    colCount: 'Count',
-    colShare: 'Share %',
-    colTrend: 'Trend',
-    colRisk: 'Risk Assessment',
-    trendWorsening: '↑ Worsening',
-    trendImproving: '↓ Improving',
-    trendStable: '→ Stable',
-
-    // Deep Review
-    deepReviewTitle: 'Deep Review Insights',
-    deepReviewSubtitle: 'Verbatim consumer reviews, recurring defects, representative quotes, and actionable engineering risks.',
-    potentialQualityRisks: 'Potential Quality Risks',
-    topRecurringIssues: 'Top Recurring Issues',
-    complaintKeywords: 'Complaint Keywords',
-    representativeQuotes: 'Representative Customer Quotes',
-    retailerPage: 'Retailer Page',
-
-    // Watchlist Management
-    watchlistTitle: 'Watchlist Management',
-    watchlistSubtitle: 'Maintain critical product catalogs, cross-platform barcode references, and automated synchronization.',
-    btnBulkAdd: 'Bulk Add SKUs',
-    btnImportCsv: 'Import CSV',
-    btnExportWatchlistCsv: 'Export CSV',
-    bulkAddPrompt: 'Paste lines directly from Excel or CSV. Format: Name | UPC | Model | WM# | TCIN | ASIN',
-    btnSaveWatchlist: 'Save Watchlist',
-    btnReload: 'Reload',
-
-    // SKU Validation
-    skuValidationTitle: 'SKU Validation',
-    skuValidationSubtitle: 'Eliminate false-positives and variant confusion across multi-retailer catalogs with strict series isolation logic.',
-    skuMatched: 'Matched',
-    skuPotentialVariant: 'Potential Variant',
-    skuNeedsReview: 'Needs Manual Review',
-    skuDuplicate: 'Duplicate SKU',
-    skuNotMatched: 'Not Matched',
-
-    // Exports Center
-    exportsCenterTitle: 'Exports Center',
-    exportsCenterSubtitle: 'Unified command center for all data reporting, formatted email tables, Excel workbooks, and extension packaging.',
-    exportExcelLowRated: 'Export Low-Rated Excel (.xls)',
-    exportExcelLowRatedDesc: 'Full formatted workbook grouping low-rated products, alert status, QA issue breakdowns, and verbatim review quotes.',
-    exportProductsCsvDesc: 'Comprehensive spreadsheet of all active retail listings, UPC numbers, ratings, review counts, and country of origin.',
-    exportLowRatedCsvDesc: 'Filtered CSV dataset strictly containing items below the benchmark for targeted vendor corrective actions.',
-    exportTrendCsvDesc: 'Historical timeline snapshots for longitudinal quality tracking.',
-    copyEmailTableDesc: 'HTML table formatted with navy headers and red alert callouts, designed to paste directly into Outlook or Gmail.',
-    copySummaryDesc: 'Natural-language bullet points synthesizing low-rated products with representative customer complaint keywords.',
-    copySnapshotDesc: 'Executive status text snippet with current KPI figures, active alert tallies, and last scan timestamp.',
-    packageExtensionDesc: 'Directly generates the unpacked extension archive for Chrome & Edge (Manifest V3) including manifest.json and background worker.',
-
-    // Settings
-    settingsTitle: 'Settings & Preferences',
-    settingsSubtitle: 'Configure quality monitoring benchmarks, dual-tier storage sync, export formats, and display preferences.',
-    settingThreshold: 'Quality Benchmark Threshold',
-    settingSync: 'Browser Sync Strategy (chrome.storage.sync)',
-    settingSyncProfile: 'Browser Profile Sync (Recommended)',
-    settingSyncLocal: 'Local Machine Only',
-    settingExportFormat: 'Default Export Format',
-    settingTheme: 'Theme & Appearance',
-    settingDensity: 'Density Mode',
-    settingLanguage: 'Display Language',
-    densityComfortable: 'Comfortable (Recommended)',
-    densityCompact: 'Compact Data Mode',
-    btnSaveSettings: 'Save Configuration',
-    btnRestoreDefaults: 'Restore Factory Defaults'
-  },
-
-  'zh-CN': {
-    // Brand & App
-    appName: 'MGA Quality Sentinel',
-    appSubtitle: '质量监控大盘',
-    tagline: '质量监控大盘',
-    lastScan: '上次扫描',
-    today: '今天',
-    connected: '浏览器扩展已连接',
-    localMode: '本地优先模式',
-    manifest: 'Manifest V3 Chromium 内核',
-    privateIsolation: '个人私有存储 · 用户隔离',
-
-    // 5 Navigation Sections
-    navDashboard: '控制面板',
-    navSearchScan: '搜索并扫描',
-    navWatchlist: '关注产品',
-    navHistory: '查询历史',
-    navSettings: '设置中心',
-
-    // Header buttons
-    btnNewProductSearch: '查询新产品',
-    btnScanCurrent: '扫描当前页面',
-    btnSearchScan: '搜索并扫描',
-    btnDeepAnalyze: '深度分析',
-    btnRefresh: '刷新大盘',
-    btnInstallExt: '安装扩展',
-    btnEmailTable: '邮件表格',
-
-    // New Product Search Confirmation Modal & Platform Status
-    confirmNewProductTitle: '是否开始查询新产品？',
-    confirmNewProductDesc: '当前产品结果将保存到历史记录，并清空当前工作区。',
-    btnSaveAndStartNew: '保存并开始新查询',
-    statusNotScanned: '未查询',
-    statusCompleted: '已完成',
-    btnContinueNextPlatform: '继续查询未完成平台',
-    btnRescanPlatform: '重新扫描该平台',
-    btnDeletePlatform: '删除该平台数据',
-    btnRestoreProduct: '恢复到工作区',
-    activeSessionTitle: '当前产品查询会话',
-    activeSessionBadge: '当前产品会话',
-    switchProductPrompt: '切换查询产品确认',
-    unqueriedPlatforms: '未查询平台',
-    queriedPlatforms: '已查询平台',
-
-    // Language dropdown
-    langSelect: '语言',
-    langEn: 'English',
-    langZhCn: '简体中文',
-    langZhTw: '繁體中文',
-
-    // Search & Scan Controls
-    searchKeywordLabel: '搜索关键词或品牌',
-    searchKeywordPlaceholder: '例如：Mini Verse, Bratz, Little Tikes, Rainbow High...',
-    platformLabel: '监控平台',
-    allPlatforms: '全部支持平台',
-    ratingThreshold: '质量警戒阈值',
-    maxResults: '抓取上限条数',
-    includeReviews: '包含深度评论抓取（自动分析低于阈值产品的消费者差评与真实反馈）',
-    btnStartSearchScan: '开始搜索与扫描',
-    btnScanning: '正在扫描中...',
-    btnStopScan: '终止 / 取消',
-    scanStatusIdle: '就绪，请输入关键词并选择平台开始扫描。',
-    scanStatusOpening: '正在浏览器中打开电商搜索门户...',
-    scanStatusLoading: '正在等待零售商页面渲染完成...',
-    scanStatusInjecting: '正在挂载内容解析脚本...',
-    scanStatusScanning: '正在抓取产品列表、星级评分与 UPC 条形码...',
-    scanStatusCrawlingReviews: '正在深度抓取低评分产品的消费者评论...',
-    scanStatusCompleted: '扫描成功完成！',
-    scanStatusCancelled: '扫描已被用户取消。',
-
-    // Empty States
-    emptyDashboardTitle: '暂无扫描数据',
-    emptyDashboardDesc: '请使用“搜索并扫描”查询目标产品系列，或直接“扫描当前页面”。',
-    btnGoToSearchScan: '前往搜索并扫描',
-    emptySearchScanTitle: '准备就绪，开始质量扫描',
-    emptySearchScanDesc: '输入产品关键词并选择电商平台，系统将自动抓取评分、差评分类与缺陷风险。',
-    emptyHistoryTitle: '暂无历史查询记录',
-    emptyHistoryDesc: '完成查询后，完整的分析结果与报表将完整保存在这里，可随时重新打开。',
-
-    // Search Results Area
-    resultsTitle: '搜索与扫描分析结果',
-    resultsSubtitle: '多渠道评分矩阵、投诉缺陷分类归因与质量风险综合分析。',
-    tabOverview: '产品总览',
-    tabCrossPlatform: '跨平台汇总',
-    tabComplaints: '投诉分析',
-    tabDeepReview: '深度评论',
-    tabTrends: '趋势追踪',
-    tabSkuValidation: 'SKU校验',
-    tabExports: '导出报表',
-    btnRescan: '重新扫描获取最新数据',
-    btnExportExcel: '导出 Excel (.xls)',
-    btnExportCsv: '导出 CSV',
-    btnCopyEmailTable: '复制邮件表格',
-    btnDeepAnalyzeAll: '深度分析全部低分品',
-
-    // Product Card / List
-    colProduct: '产品名称',
-    colPlatform: '平台',
-    colIdentifiers: 'UPC / 型号 / 编码',
-    colRating: '评分',
-    colReviews: '评论数',
-    colAlertStatus: '质量状态',
-    colIssues: '主要缺陷',
-    colActions: '操作',
-    statusAlert: '警戒 (ALERT)',
-    statusPass: '合格 (PASS)',
-    statusManual: '人工核对',
-
-    // History Page
-    historyTitle: '个人查询历史记录',
-    historySubtitle: '保存在本地的查询记录，包含完整分析结果。点击即可直接重新打开，无需重新扫描。',
-    searchHistoryPlaceholder: '按关键词筛选历史记录...',
-    filterByPlatform: '按平台筛选',
-    sortBy: '排序方式',
-    sortNewest: '最新查询优先',
-    sortOldest: '最早查询优先',
-    sortItemsHigh: '抓取商品最多',
-    sortRatingLow: '最低评分优先',
-    btnOpenResult: '打开分析结果',
-    btnDelete: '删除',
-    btnDeleteSelected: '批量删除选中',
-    btnClearAll: '清空全部历史',
-    confirmDeleteOne: '确定要删除这条查询记录吗？',
-    confirmDeleteBatch: '确定要删除所选的查询记录吗？',
-    confirmClearAll: '确定要清空您的所有本地查询历史吗？',
-    btnConfirmDelete: '确定删除',
-    btnCancel: '取消',
-    selectedRecords: '条已选中',
-
-    // KPI Cards
-    kpiWatchlist: '关注产品',
-    kpiTrackedSkus: '重点监控 SKU',
-    kpiLowRating: '低分商品数',
-    kpiBelowThreshold: '低于警戒值商品 <',
-    kpiPlatforms: '监控渠道',
-    kpiPlatformCoverage: '沃尔玛 · 亚马逊 · 塔吉特 · Costco',
-    kpiAlerts: '最低评分',
-    kpiActiveExceptions: '全渠道最低评分',
-    kpiTotalScanned: '扫描商品总数',
-    kpiTotalScannedSubtitle: '已扫描的各渠道在售商品',
-    lowestRatingLabel: '最低评分',
-    totalScannedLabel: '扫描商品总数',
-    lowRatedCountLabel: '低于警戒值',
-    noLowRatedFound: '未发现低于警戒值的商品',
-    openProductPage: '打开商品页面',
-    lowRatedItemsTitle: '低于警戒值的商品列表 (< 阈值)',
-    scannedItemsCount: '扫描',
-    itemsWord: '个商品',
-
-    // Alert Center
-    alertCenterTitle: '预警中心 — 低于警戒值产品',
-    alertCenterSubtitle: '需立即介入处理的质量异常 · 警戒基准线: <',
-    alertCritical: '紧急警戒',
-    alertViewAll: '查看全部缺陷预警',
-    alertBelowOn: '以下渠道低于警戒线:',
-    alertLowest: '最低评分',
-    alertOn: '在',
-    alertCompliant: '所有监控产品均达到或超过质量基准线。',
-    alertNoBreaches: '沃尔玛、亚马逊和塔吉特未检测到活跃质量违规项。',
-
-    // Executive Summary
-    execSummaryTitle: '质量执行摘要与核心结论',
-    execSummarySubtitle: '面向 QA 通报、产品评审会议与高层汇报的自动化缺陷归因总结。',
-    thresholdLabel: '警戒阈值:',
-    focusBelowOnly: '仅关注低于阈值产品',
-    copyEmailTable: '复制为邮件表格',
-    copiedClipboard: '已复制到剪贴板！',
-    totalFamiliesTracked: '个核心产品系列覆盖监控',
-    formatReadyOutlook: '格式已优化，可直接粘贴 (Ctrl+V) 至 Outlook、Teams 或网页邮箱',
-
-    // Cross Platform Matrix
-    searchPlaceholder: '搜索产品名称、UPC 或型号...',
-    filterAll: '全部商品',
-    filterBelow: '低于基准线',
-    filterCompliant: '达标合格品',
-    exportCsv: '导出 CSV',
-    colProductIdent: '产品标识信息',
-    colBreachedChannels: '低于基准渠道',
-    colStatus: '状态',
-    colDetails: '详情',
-    showingGroups: '当前展示',
-    ofGroups: '共',
-    groupedLines: '组系列产品',
-    seriesGuardNotice: '跨平台系列冲突防护已激活 · 评分严格对比阈值',
-
-    // Complaint Analytics
-    complaintAnalyticsTitle: '消费者投诉与缺陷分类',
-    complaintAnalyticsSubtitle: '量化统计缺陷分布、占比权重及各电商通路的特定质量问题。',
-    viewBarChart: '柱状图',
-    viewProportion: '占比分布',
-    viewHeatmap: '渠道热力图',
-    colCategory: '缺陷类别',
-    colCount: '投诉数量',
-    colShare: '占比 %',
-    colTrend: '变化趋势',
-    colRisk: '风险评级',
-    trendWorsening: '↑ 恶化加剧',
-    trendImproving: '↓ 正在改善',
-    trendStable: '→ 保持平稳',
-
-    // Deep Review
-    deepReviewTitle: '深度评论洞察',
-    deepReviewSubtitle: '消费者原声文本、高频缺陷关键词、代表性差评摘录与工程整改建议。',
-    potentialQualityRisks: '潜在质量风险点',
-    topRecurringIssues: '高频复发缺陷',
-    complaintKeywords: '差评高频词',
-    representativeQuotes: '消费者代表性差评原声',
-    retailerPage: '零售商页面',
-
-    // Watchlist Management
-    watchlistTitle: '重点关注产品管理',
-    watchlistSubtitle: '维护重点产品品类库、跨平台条码映射与多渠道自动校验规则。',
-    btnBulkAdd: '批量添加 SKU',
-    btnImportCsv: '导入 CSV',
-    btnExportWatchlistCsv: '导出 CSV',
-    bulkAddPrompt: '可直接从 Excel 复制粘贴（支持制表符 Tab、竖线 |、逗号）。格式：产品名称 | UPC | 型号 | 沃尔玛# | 塔吉特# | 亚马逊ASIN',
-    btnSaveWatchlist: '保存关注列表',
-    btnReload: '重新载入',
-
-    // SKU Validation
-    skuValidationTitle: 'SKU 校验与防误合并',
-    skuValidationSubtitle: '依托严格的系列隔离保护算法，杜绝跨渠道产品数据误合并与变体混淆。',
-    skuMatched: '已精确匹配',
-    skuPotentialVariant: '潜在变体',
-    skuNeedsReview: '需人工复核',
-    skuDuplicate: '重复条形码',
-    skuNotMatched: '未收录匹配',
-
-    // Exports Center
-    exportsCenterTitle: '统一导出中心',
-    exportsCenterSubtitle: '集中管理所有质量报表、邮件汇报表格、Excel 工作簿以及扩展离线部署包。',
-    exportExcelLowRated: '导出低评分分析 Excel (.xls)',
-    exportExcelLowRatedDesc: '带颜色高亮、按产品分组的标准化工作簿，包含缺陷分布与原声评论。',
-    exportProductsCsvDesc: '包含所有零售列表、UPC、评分、评论总数与原产国的全量数据集。',
-    exportLowRatedCsvDesc: '专为供应商整改与质量通报准备的低于阈值产品专属清单。',
-    exportTrendCsvDesc: '长周期时序评分快照（产品、渠道、日期、评分、评论数）。',
-    copyEmailTableDesc: '深蓝色表头与警示标红的 HTML 邮件格式，专为粘贴到 Outlook / 邮箱设计。',
-    copySummaryDesc: '提炼低评分产品代表性缺陷关键词的自然语言执行摘要。',
-    copySnapshotDesc: '包含核心指标与未达标警报的即时文字简报，便于 Teams 汇报。',
-    packageExtensionDesc: '一键生成即用型 Chrome / Edge 扩展离线安装包（Manifest V3 无需服务器）。',
-
-    // Settings
-    settingsTitle: '系统设置与偏好配置',
-    settingsSubtitle: '设定质量警戒基准线、浏览器账号同步策略、默认导出格式与界面外观。',
-    settingThreshold: '质量警戒评分基准线',
-    settingSync: '浏览器跨设备漫游同步 (chrome.storage.sync)',
-    settingSyncProfile: '浏览器账号自动同步 (推荐)',
-    settingSyncLocal: '仅限本机独立保存',
-    settingExportFormat: '默认导出文件格式',
-    settingTheme: '界面主题外观',
-    settingDensity: '信息展示密度',
-    settingLanguage: '界面显示语言',
-    densityComfortable: '舒适模式 (推荐 - 留白充裕)',
-    densityCompact: '紧凑数据模式 (高密度表格)',
-    btnSaveSettings: '保存系统配置',
-    btnRestoreDefaults: '恢复出厂默认'
-  },
-
-  'zh-TW': {
-    // Brand & App
-    appName: 'MGA Quality Sentinel',
-    appSubtitle: '品質監控大盤',
-    tagline: '品質監控大盤',
-    lastScan: '上次掃描',
-    today: '今天',
-    connected: '瀏覽器擴充功能已連線',
-    localMode: '本機優先模式',
-    manifest: 'Manifest V3 Chromium 核心',
-    privateIsolation: '個人私有儲存 · 使用者隔離',
-
-    // 5 Navigation Sections
-    navDashboard: '主控面板',
-    navSearchScan: '搜尋並掃描',
-    navWatchlist: '關注產品',
-    navHistory: '查詢歷史',
-    navSettings: '設定中心',
-
-    // Header buttons
-    btnNewProductSearch: '查詢新產品',
-    btnScanCurrent: '掃描目前頁面',
-    btnSearchScan: '搜尋並掃描',
-    btnDeepAnalyze: '深度分析',
-    btnRefresh: '重新整理大盤',
-    btnInstallExt: '安裝擴充功能',
-    btnEmailTable: '郵件表格',
-
-    // New Product Search Confirmation Modal & Platform Status
-    confirmNewProductTitle: '是否開始查詢新產品？',
-    confirmNewProductDesc: '當前產品結果將保存到歷史記錄，並清空當前工作區。',
-    btnSaveAndStartNew: '保存並開始新查詢',
-    statusNotScanned: '未查詢',
-    statusCompleted: '已完成',
-    btnContinueNextPlatform: '繼續查詢未完成平台',
-    btnRescanPlatform: '重新掃描該平台',
-    btnDeletePlatform: '刪除該平台數據',
-    btnRestoreProduct: '恢復到工作區',
-    activeSessionTitle: '當前產品查詢會話',
-    activeSessionBadge: '當前產品會話',
-    switchProductPrompt: '切換查詢產品確認',
-    unqueriedPlatforms: '未查詢平台',
-    queriedPlatforms: '已查詢平台',
-
-    // Language dropdown
-    langSelect: '語言',
-    langEn: 'English',
-    langZhCn: '简体中文',
-    langZhTw: '繁體中文',
-
-    // Search & Scan Controls
-    searchKeywordLabel: '搜尋關鍵字或品牌',
-    searchKeywordPlaceholder: '例如：Mini Verse, Bratz, Little Tikes, Rainbow High...',
-    platformLabel: '監控平台',
-    allPlatforms: '全部支援平台',
-    ratingThreshold: '品質警戒閾值',
-    maxResults: '擷取上限筆數',
-    includeReviews: '包含深度評論擷取（自動分析低於閾值產品的消費者負評與真實反饋）',
-    btnStartSearchScan: '開始搜尋與掃描',
-    btnScanning: '正在掃描中...',
-    btnStopScan: '終止 / 取消',
-    scanStatusIdle: '就緒，請輸入關鍵字並選擇平台開始掃描。',
-    scanStatusOpening: '正在瀏覽器中開啟電商搜尋入口...',
-    scanStatusLoading: '正在等待零售商頁面渲染完成...',
-    scanStatusInjecting: '正在掛載內容解析腳本...',
-    scanStatusScanning: '正在擷取產品清單、星級評分與 UPC 條形碼...',
-    scanStatusCrawlingReviews: '正在深度擷取低評分產品的消費者評論...',
-    scanStatusCompleted: '掃描成功完成！',
-    scanStatusCancelled: '掃描已被使用者取消。',
-
-    // Empty States
-    emptyDashboardTitle: '暫無掃描數據',
-    emptyDashboardDesc: '請使用「搜尋並掃描」查詢目標產品系列，或直接「掃描目前頁面」。',
-    btnGoToSearchScan: '前往搜尋並掃描',
-    emptySearchScanTitle: '準備就緒，開始品質掃描',
-    emptySearchScanDesc: '輸入產品關鍵字並選擇電商平台，系統將自動擷取評分、負評分類與缺陷風險。',
-    emptyHistoryTitle: '暫無歷史查詢紀錄',
-    emptyHistoryDesc: '完成查詢後，完整的分析結果與報表將完整儲存在此處，可隨時重新開啟。',
-
-    // Search Results Area
-    resultsTitle: '搜尋與掃描分析結果',
-    resultsSubtitle: '多通路評分矩陣、投訴缺陷分類歸因與品質風險綜合分析。',
-    tabOverview: '產品總覽',
-    tabCrossPlatform: '跨平台彙總',
-    tabComplaints: '投訴分析',
-    tabDeepReview: '深度評論',
-    tabTrends: '趨勢追蹤',
-    tabSkuValidation: 'SKU校驗',
-    tabExports: '匯出報表',
-    btnRescan: '重新掃描獲取最新數據',
-    btnExportExcel: '匯出 Excel (.xls)',
-    btnExportCsv: '匯出 CSV',
-    btnCopyEmailTable: '複製郵件表格',
-    btnDeepAnalyzeAll: '深度分析全部低分品',
-
-    // Product Card / List
-    colProduct: '產品名稱',
-    colPlatform: '平台',
-    colIdentifiers: 'UPC / 型號 / 編碼',
-    colRating: '評分',
-    colReviews: '評論數',
-    colAlertStatus: '品質狀態',
-    colIssues: '主要缺陷',
-    colActions: '操作',
-    statusAlert: '警戒 (ALERT)',
-    statusPass: '合格 (PASS)',
-    statusManual: '人工核對',
-
-    // History Page
-    historyTitle: '個人查詢歷史紀錄',
-    historySubtitle: '儲存在本機的查詢紀錄，包含完整分析結果。點擊即可直接重新開啟，無需重新掃描。',
-    searchHistoryPlaceholder: '按關鍵字篩選歷史紀錄...',
-    filterByPlatform: '按平台篩選',
-    sortBy: '排序方式',
-    sortNewest: '最新查詢優先',
-    sortOldest: '最早查詢優先',
-    sortItemsHigh: '擷取商品最多',
-    sortRatingLow: '最低評分優先',
-    btnOpenResult: '開啟分析結果',
-    btnDelete: '刪除',
-    btnDeleteSelected: '批次刪除選取',
-    btnClearAll: '清空全部歷史',
-    confirmDeleteOne: '確定要刪除這條查詢紀錄嗎？',
-    confirmDeleteBatch: '確定要刪除所選的查詢紀錄嗎？',
-    confirmClearAll: '確定要清空您的所有本機查詢歷史嗎？',
-    btnConfirmDelete: '確定刪除',
-    btnCancel: '取消',
-    selectedRecords: '筆已選取',
-
-    // KPI Cards
-    kpiWatchlist: '關注產品',
-    kpiTrackedSkus: '重點監控 SKU',
-    kpiLowRating: '低分商品數',
-    kpiBelowThreshold: '低於警戒值商品 <',
-    kpiPlatforms: '監控通路',
-    kpiPlatformCoverage: '沃爾瑪 · 亞馬遜 · 塔吉特 · Costco',
-    kpiAlerts: '最低評分',
-    kpiActiveExceptions: '全通路最低評分',
-    kpiTotalScanned: '掃描商品總數',
-    kpiTotalScannedSubtitle: '已掃描的各通路在售商品',
-    lowestRatingLabel: '最低評分',
-    totalScannedLabel: '掃描商品總數',
-    lowRatedCountLabel: '低於警戒值',
-    noLowRatedFound: '未發現低於警戒值的商品',
-    openProductPage: '開啟商品頁面',
-    lowRatedItemsTitle: '低於警戒值的商品列表 (< 閾值)',
-    scannedItemsCount: '掃描',
-    itemsWord: '個商品',
-
-    // Alert Center
-    alertCenterTitle: '預警中心 — 低於警戒值產品',
-    alertCenterSubtitle: '需立即介入處理的品質異常 · 警戒基準線: <',
-    alertCritical: '緊急警戒',
-    alertViewAll: '查看全部缺陷預警',
-    alertBelowOn: '以下通路低於警戒線:',
-    alertLowest: '最低評分',
-    alertOn: '在',
-    alertCompliant: '所有監控產品均達到或超過品質基準線。',
-    alertNoBreaches: '沃爾瑪、亞馬遜和塔吉特未檢測到活躍品質違規項。',
-
-    // Executive Summary
-    execSummaryTitle: '品質執行摘要與核心結論',
-    execSummarySubtitle: '面向 QA 通報、產品評審會議與高層匯報的自動化缺陷歸因總結。',
-    thresholdLabel: '警戒閾值:',
-    focusBelowOnly: '僅關注低於閾值產品',
-    copyEmailTable: '複製為郵件表格',
-    copiedClipboard: '已複製到剪貼簿！',
-    totalFamiliesTracked: '個核心產品系列覆蓋監控',
-    formatReadyOutlook: '格式已優化，可直接貼上 (Ctrl+V) 至 Outlook、Teams 或網頁信箱',
-
-    // Cross Platform Matrix
-    searchPlaceholder: '搜尋產品名稱、UPC 或型號...',
-    filterAll: '全部商品',
-    filterBelow: '低於基準線',
-    filterCompliant: '達標合格品',
-    exportCsv: '匯出 CSV',
-    colProductIdent: '產品識別資訊',
-    colBreachedChannels: '低於基準通路',
-    colStatus: '狀態',
-    colDetails: '詳情',
-    showingGroups: '目前展示',
-    ofGroups: '共',
-    groupedLines: '組系列產品',
-    seriesGuardNotice: '跨平台系列衝突防護已啟用 · 評分嚴格對比閾值',
-
-    // Complaint Analytics
-    complaintAnalyticsTitle: '消費者投訴與缺陷分類',
-    complaintAnalyticsSubtitle: '量化統計缺陷分佈、佔比權重及各電商通路的特定品質問題。',
-    viewBarChart: '柱狀圖',
-    viewProportion: '佔比分佈',
-    viewHeatmap: '通路熱力圖',
-    colCategory: '缺陷類別',
-    colCount: '投訴數量',
-    colShare: '佔比 %',
-    colTrend: '變化趨勢',
-    colRisk: '風險評級',
-    trendWorsening: '↑ 惡化加劇',
-    trendImproving: '↓ 正在改善',
-    trendStable: '→ 保持平穩',
-
-    // Deep Review
-    deepReviewTitle: '深度評論洞察',
-    deepReviewSubtitle: '消費者原聲文字、高頻缺陷關鍵字、代表性負評摘錄與工程整改建議。',
-    potentialQualityRisks: '潛在品質風險點',
-    topRecurringIssues: '高頻復發缺陷',
-    complaintKeywords: '負評高頻詞',
-    representativeQuotes: '消費者代表性負評原聲',
-    retailerPage: '零售商頁面',
-
-    // Watchlist Management
-    watchlistTitle: '重點關注產品管理',
-    watchlistSubtitle: '維護重點產品品類庫、跨平台條碼映射與多通路自動校驗規則。',
-    btnBulkAdd: '批量添加 SKU',
-    btnImportCsv: '導入 CSV',
-    btnExportWatchlistCsv: '導出 CSV',
-    bulkAddPrompt: '可直接從 Excel 複製貼上（支援定位點 Tab、豎線 |、逗號）。格式：產品名稱 | UPC | 型號 | 沃爾瑪# | 塔吉特# | 亞馬遜ASIN',
-    btnSaveWatchlist: '保存關注列表',
-    btnReload: '重新載入',
-
-    // SKU Validation
-    skuValidationTitle: 'SKU 校驗與防誤合併',
-    skuValidationSubtitle: '依託嚴格的系列隔離保護演算法，杜絕跨通路產品數據誤合併與變體混淆。',
-    skuMatched: '已精確匹配',
-    skuPotentialVariant: '潛在變體',
-    skuNeedsReview: '需人工複核',
-    skuDuplicate: '重複條形碼',
-    skuNotMatched: '未收錄匹配',
-
-    // Exports Center
-    exportsCenterTitle: '統一導出中心',
-    exportsCenterSubtitle: '集中管理所有質量報表、郵件匯報表格、Excel 工作簿以及擴充功能離線部署包。',
-    exportExcelLowRated: '導出低評分分析 Excel (.xls)',
-    exportExcelLowRatedDesc: '帶顏色高亮、按產品分組的標準化工作簿，包含缺陷分佈與原聲評論。',
-    exportProductsCsvDesc: '包含所有零售列表、UPC、評分、評論總數與原產國的全量數據集。',
-    exportLowRatedCsvDesc: '專為供應商整改與質量通報準備的低於閾值產品專屬清單。',
-    exportTrendCsvDesc: '長週期時序評分快照（產品、通路、日期、評分、評論數）。',
-    copyEmailTableDesc: '深藍色表頭與警示標紅的 HTML 郵件格式，專為貼上到 Outlook / 郵箱設計。',
-    copySummaryDesc: '提煉低評分產品代表性缺陷關鍵詞的自然語言執行摘要。',
-    copySnapshotDesc: '包含核心指標與未達標警報的即時文字簡報，便於 Teams 匯報。',
-    packageExtensionDesc: '一鍵生成即用型 Chrome / Edge 擴充功能離線安裝包（Manifest V3 無需伺服器）。',
-
-    // Settings
-    settingsTitle: '系統設置與偏好配置',
-    settingsSubtitle: '設定質量警戒基準線、瀏覽器帳號同步策略、預設導出格式與介面外觀。',
-    settingThreshold: '質量警戒評分基準線',
-    settingSync: '瀏覽器跨裝置漫遊同步 (chrome.storage.sync)',
-    settingSyncProfile: '瀏覽器帳號自動同步 (推薦)',
-    settingSyncLocal: '僅限本機獨立保存',
-    settingExportFormat: '預設導出檔案格式',
-    settingTheme: '介面主題外觀',
-    settingDensity: '資訊展示密度',
-    settingLanguage: '介面顯示語言',
-    densityComfortable: '舒適模式 (推薦 - 留白充裕)',
-    densityCompact: '緊湊數據模式 (高密度表格)',
-    btnSaveSettings: '保存系統配置',
-    btnRestoreDefaults: '恢復出廠預設'
-  }
+export type TranslationDictionary = typeof enDict & {
+  // Backward compatibility keys
+  kpiLowRating: string;
+  kpiBelowThreshold: string;
+  kpiPlatforms: string;
+  kpiPlatformCoverage: string;
+  kpiAlerts: string;
+  kpiActiveExceptions: string;
+  kpiWatchlist: string;
+  kpiTrackedSkus: string;
+  kpiTotalScanned: string;
+  kpiTotalScannedSubtitle: string;
+  lowRatedCountLabel: string;
+  execSummaryTitle: string;
+  execSummarySubtitle: string;
+  alertCenterTitle: string;
+  alertCenterSubtitle: string;
+  alertCritical: string;
+  alertViewAll: string;
+  alertLowest: string;
+  alertOn: string;
+  alertCompliant: string;
+  alertNoBreaches: string;
+  alertBelowOn: string;
+  thresholdLabel: string;
+  focusBelowOnly: string;
+  copyEmailTable: string;
+  copiedClipboard: string;
+  totalFamiliesTracked: string;
+  formatReadyOutlook: string;
+  searchPlaceholder: string;
+  filterAll: string;
+  filterBelow: string;
+  filterCompliant: string;
+  exportCsv: string;
+  colProductIdent: string;
+  colBreachedChannels: string;
+  colStatus: string;
+  colDetails: string;
+  showingGroups: string;
+  ofGroups: string;
+  groupedLines: string;
+  seriesGuardNotice: string;
+  complaintAnalyticsTitle: string;
+  complaintAnalyticsSubtitle: string;
+  viewBarChart: string;
+  viewPieChart: string;
+  totalIssuesLogged: string;
+  criticalDefects: string;
+  topComplaintCategory: string;
+  channelWithMostIssues: string;
+  deepReviewTitle: string;
+  deepReviewSubtitle: string;
+  deepScanNote: string;
+  showingReviewsFor: string;
+  trendTrackingTitle: string;
+  trendTrackingSubtitle: string;
+  skuValidationTitle: string;
+  skuValidationSubtitle: string;
+  exportsCenterTitle: string;
+  exportsCenterSubtitle: string;
+  settingThreshold: string;
+  settingSync: string;
+  settingSyncProfile: string;
+  settingSyncLocal: string;
+  settingExportFormat: string;
+  settingTheme: string;
+  settingDensity: string;
+  settingLanguage: string;
+  densityComfortable: string;
+  densityCompact: string;
+  btnRestoreDefaults: string;
 };
 
-export function getTranslation(lang: Language = 'en') {
-  return TRANSLATIONS[lang] || TRANSLATIONS.en;
+function buildCompatibilityDict(base: typeof enDict, lang: Language): TranslationDictionary {
+  const isZhCn = lang === 'zh-CN';
+  const isZhHant = lang === 'zh-Hant';
+
+  return {
+    ...base,
+    kpiLowRating: base.lowRatedItemsLabel,
+    kpiBelowThreshold: base.belowThresholdLabel,
+    kpiPlatforms: base.monitoredChannelsLabel,
+    kpiPlatformCoverage: base.monitoredChannelsCoverage,
+    kpiAlerts: base.lowestRatingLabel,
+    kpiActiveExceptions: isZhCn ? '全渠道最低评分' : isZhHant ? '全通路最低評分' : 'Lowest Rating Across Channels',
+    kpiWatchlist: isZhCn ? '关注产品' : isZhHant ? '關注產品' : 'Watchlist',
+    kpiTrackedSkus: isZhCn ? '重点监控 SKU' : isZhHant ? '重點監控 SKU' : 'Tracked SKUs',
+    kpiTotalScanned: base.totalScannedLabel,
+    kpiTotalScannedSubtitle: base.totalScannedSubtitle,
+    lowRatedCountLabel: base.belowThresholdLabel,
+
+    execSummaryTitle: isZhCn ? '质量执行摘要与核心结论' : isZhHant ? '品質執行摘要與核心結論' : 'Executive Quality Summary & Key Findings',
+    execSummarySubtitle: isZhCn ? '面向 QA 通报、产品评审会议与高层汇报的自动化缺陷归因总结。' : isZhHant ? '面向 QA 通報、產品評審會議與高層匯報的自動化缺陷歸因總結。' : 'Automated defect synthesis for QA bulletins, product review meetings, and executive reporting.',
+    alertCenterTitle: isZhCn ? '预警中心 — 低于警戒值产品' : isZhHant ? '預警中心 — 低於警戒值產品' : 'Alert Center — Products Below Threshold',
+    alertCenterSubtitle: isZhCn ? '需立即介入处理的质量异常 · 警戒基准线: <' : isZhHant ? '需立即介入處理的品質異常 · 警戒基準線: <' : 'Immediate QA action required · Benchmark threshold: <',
+    alertCritical: isZhCn ? '紧急警戒' : isZhHant ? '緊急警戒' : 'Critical',
+    alertViewAll: isZhCn ? '查看全部缺陷预警' : isZhHant ? '查看全部缺陷預警' : 'View All Defect Alerts',
+    alertLowest: base.lowestRatingLabel,
+    alertOn: isZhCn ? '在' : isZhHant ? '在' : 'on',
+    alertCompliant: isZhCn ? '所有监控商品均达到或高于警戒基准线。' : isZhHant ? '所有監控商品均達到或高於警戒基準線。' : 'All monitored products meet or exceed the benchmark.',
+    alertNoBreaches: isZhCn ? '所有已监控零售渠道未检测到低于警戒值的低分违规项。' : isZhHant ? '所有已監控零售通路未檢測到低於警戒值的低分違規項。' : 'No active quality breaches detected across monitored retail portals.',
+    alertBelowOn: isZhCn ? '以下渠道低于警戒线:' : isZhHant ? '以下通路低於警戒線:' : 'Below threshold on:',
+
+    thresholdLabel: isZhCn ? '警戒阈值:' : isZhHant ? '警戒閾值:' : 'Threshold:',
+    focusBelowOnly: isZhCn ? '仅关注低于阈值产品' : isZhHant ? '僅關注低於閾值產品' : 'Focus < threshold only',
+    copyEmailTable: base.btnCopyEmailTable,
+    copiedClipboard: isZhCn ? '已复制到剪贴板！' : isZhHant ? '已複製到剪貼簿！' : 'Copied to Clipboard!',
+    totalFamiliesTracked: isZhCn ? '个核心产品系列覆盖监控' : isZhHant ? '個核心產品系列覆蓋監控' : 'total product families tracked across retail portals',
+    formatReadyOutlook: isZhCn ? '格式已优化，可直接粘贴 (Ctrl+V) 至 Outlook、Teams 或网页邮箱' : isZhHant ? '格式已優化，可直接貼上 (Ctrl+V) 至 Outlook、Teams 或網頁信箱' : 'Format ready for direct paste into Outlook, Teams, or Gmail',
+
+    searchPlaceholder: isZhCn ? '搜索产品名称、UPC 或型号...' : isZhHant ? '搜尋產品名稱、UPC 或型號...' : 'Search product name, UPC, or model...',
+    filterAll: isZhCn ? '全部商品' : isZhHant ? '全部商品' : 'All',
+    filterBelow: isZhCn ? '低于基准线' : isZhHant ? '低於基準線' : 'Below Benchmark',
+    filterCompliant: isZhCn ? '达标合格品' : isZhHant ? '達標合格品' : 'Compliant',
+    exportCsv: base.btnExportCsv,
+    colProductIdent: isZhCn ? '产品标识信息' : isZhHant ? '產品標識資訊' : 'Product Identification',
+    colBreachedChannels: isZhCn ? '低于基准渠道' : isZhHant ? '低於基準通路' : 'Channels < Threshold',
+    colStatus: base.colAlertStatus,
+    colDetails: isZhCn ? '详情' : isZhHant ? '詳情' : 'Details',
+    showingGroups: isZhCn ? '当前展示' : isZhHant ? '當前顯示' : 'Showing',
+    ofGroups: isZhCn ? '共' : isZhHant ? '共' : 'of',
+    groupedLines: isZhCn ? '组系列产品' : isZhHant ? '組系列產品' : 'grouped product lines',
+    seriesGuardNotice: isZhCn ? '跨平台系列冲突防护已激活 · 评分严格对比阈值' : isZhHant ? '跨平台系列衝突防護已啟用 · 評分嚴格比對閾值' : 'Cross-platform series conflict prevention active · Ratings strictly checked against threshold',
+
+    complaintAnalyticsTitle: isZhCn ? '消费者差评与缺陷分类' : isZhHant ? '消費者差評與缺陷分類' : 'Complaint Classification',
+    complaintAnalyticsSubtitle: isZhCn ? '量化统计缺陷分布、占比权重及各电商通路的特定质量问题。' : isZhHant ? '量化統計缺陷分佈、佔比權重及各電商通路的特定品質問題。' : 'Defect distribution, weighting, and retailer-specific QA breakdowns.',
+    viewBarChart: isZhCn ? '柱状图' : isZhHant ? '長條圖' : 'Bar Chart',
+    viewPieChart: isZhCn ? '环形图' : isZhHant ? '圓形圖' : 'Pie Chart',
+    totalIssuesLogged: isZhCn ? '归因缺陷总数' : isZhHant ? '歸因缺陷總數' : 'Total Issues Logged',
+    criticalDefects: isZhCn ? '严重缺陷项' : isZhHant ? '嚴重缺陷項' : 'Critical Defects',
+    topComplaintCategory: isZhCn ? '最高频问题分类' : isZhHant ? '最高頻問題分類' : 'Top Complaint Category',
+    channelWithMostIssues: isZhCn ? '差评高发电商渠道' : isZhHant ? '差評高發電商通路' : 'Retailer with Most Issues',
+
+    deepReviewTitle: isZhCn ? '深度差评洞察' : isZhHant ? '深度差評洞察' : 'Deep Review Insights',
+    deepReviewSubtitle: isZhCn ? '抓取低分商品的原声买家评价，提炼高频痛点词汇。' : isZhHant ? '擷取低分商品的原聲買家評價，提煉高頻痛點詞彙。' : 'Natural customer feedback and recurring quality themes on low-rated items.',
+    deepScanNote: isZhCn ? '针对低于警戒值的商品自动抓取真实买家评价。' : isZhHant ? '針對低於警戒值的商品自動擷取真實買家評價。' : 'Auto-crawled customer feedback for items below alert threshold.',
+    showingReviewsFor: isZhCn ? '已分析评论：' : isZhHant ? '已分析評論：' : 'Showing reviews for:',
+
+    trendTrackingTitle: isZhCn ? '质量评分趋势追踪' : isZhHant ? '品質評分趨勢追蹤' : 'Quality Trend Tracking',
+    trendTrackingSubtitle: isZhCn ? '跟踪产品评分的时序变化，及时捕获批次质量滑坡。' : isZhHant ? '追蹤產品評分的時序變化，及時掌握批次品質滑坡。' : 'Historical rating trajectories across retail platforms.',
+
+    skuValidationTitle: isZhCn ? 'SKU 识别与防误合并校验' : isZhHant ? 'SKU 識別與防誤合併校驗' : 'SKU Validation & Series Guard',
+    skuValidationSubtitle: isZhCn ? '依托严格的系列隔离算法，杜绝跨平台产品数据误合并。' : isZhHant ? '依託嚴格的系列隔離演算法，杜絕跨通路產品資料誤合併。' : 'Cross-platform series conflict prevention and barcode verification.',
+
+    exportsCenterTitle: isZhCn ? '数据导出与报告中心' : isZhHant ? '資料匯出與報告中心' : 'Exports & Reporting Center',
+    exportsCenterSubtitle: isZhCn ? '集中导出质量分析 Excel 表格、CSV 及报告。' : isZhHant ? '集中匯出品質分析 Excel 表格、CSV 及報告。' : 'Unified download hub for quality workbooks, tables, and reports.',
+
+    settingThreshold: isZhCn ? '质量警戒评分基准线' : isZhHant ? '品質警戒評分基準線' : 'Quality Alert Threshold Benchmark',
+    settingSync: isZhCn ? '浏览器跨设备漫游同步 (chrome.storage.sync)' : isZhHant ? '瀏覽器跨裝置漫遊同步 (chrome.storage.sync)' : 'Browser Roaming Sync (chrome.storage.sync)',
+    settingSyncProfile: isZhCn ? '浏览器账号自动同步 (推荐)' : isZhHant ? '瀏覽器帳號自動同步 (推薦)' : 'Browser Account Auto-Sync (Recommended)',
+    settingSyncLocal: isZhCn ? '仅限本机独立保存 (隐私保护)' : isZhHant ? '僅限本機獨立儲存 (隱私保護)' : 'Local Storage Only (Maximum Privacy)',
+    settingExportFormat: isZhCn ? '默认导出文件格式' : isZhHant ? '預設匯出檔案格式' : 'Default Export Format',
+    settingTheme: isZhCn ? '界面主题外观' : isZhHant ? '介面主題外觀' : 'Appearance Theme',
+    settingDensity: isZhCn ? '信息展示密度' : isZhHant ? '資訊展示密度' : 'Information Density',
+    settingLanguage: isZhCn ? '界面显示语言' : isZhHant ? '介面顯示語言' : 'Interface Language',
+    densityComfortable: isZhCn ? '标准舒适间距 (推荐)' : isZhHant ? '標準舒適間距 (推薦)' : 'Comfortable (Standard)',
+    densityCompact: isZhCn ? '紧凑高密模式' : isZhHant ? '緊湊高密模式' : 'Compact (High Density)',
+    btnRestoreDefaults: isZhCn ? '恢复默认设置' : isZhHant ? '恢復預設設定' : 'Reset Defaults'
+  };
+}
+
+const TRANSLATIONS_MAP: Record<Language, TranslationDictionary> = {
+  en: buildCompatibilityDict(enDict, 'en'),
+  'zh-CN': buildCompatibilityDict(zhCnDict, 'zh-CN'),
+  'zh-Hant': buildCompatibilityDict(zhHantDict, 'zh-Hant')
+};
+
+export function getTranslation(lang: Language = 'en'): TranslationDictionary {
+  if (lang === 'zh-CN') return TRANSLATIONS_MAP['zh-CN'];
+  if (lang === 'zh-Hant' || (lang as any) === 'zh-TW') return TRANSLATIONS_MAP['zh-Hant'];
+  return TRANSLATIONS_MAP.en;
+}
+
+/**
+ * Format dynamic summary findings into the user's selected language.
+ * Guarantees that language switching re-renders this text immediately without re-scanning.
+ */
+export function formatDynamicFindings(params: {
+  completedCount: number;
+  totalScanned: number;
+  totalLowRated: number;
+  lowestRating: number | null;
+  threshold: number;
+  lang: Language;
+}): string {
+  const { completedCount, totalScanned, totalLowRated, lowestRating, threshold, lang } = params;
+
+  if (completedCount === 0) {
+    if (lang === 'zh-CN') return '未开始任何平台查询。';
+    if (lang === 'zh-Hant') return '尚未開始任何平台查詢。';
+    return 'No retail platform scans initiated yet.';
+  }
+
+  if (totalLowRated > 0 && lowestRating !== null) {
+    if (lang === 'zh-CN') {
+      return `在已查询的 ${completedCount} 个平台中共扫描 ${totalScanned} 个商品，发现 ${totalLowRated} 个低于警戒值 (${threshold.toFixed(1)}) 的低分商品，全网最低评分为 ${lowestRating.toFixed(1)}★。`;
+    }
+    if (lang === 'zh-Hant') {
+      return `在已查詢的 ${completedCount} 個平台中共掃描 ${totalScanned} 個商品，發現 ${totalLowRated} 個低於警戒值 (${threshold.toFixed(1)}) 的低分商品，全通路最低評分為 ${lowestRating.toFixed(1)}★。`;
+    }
+    return `Scanned ${totalScanned} item(s) across ${completedCount} queried platform(s); detected ${totalLowRated} item(s) strictly below alert threshold (${threshold.toFixed(1)}), with lowest rating at ${lowestRating.toFixed(1)}★.`;
+  }
+
+  if (lang === 'zh-CN') {
+    return `在已查询的 ${completedCount} 个平台中共扫描 ${totalScanned} 个商品，所有在售商品评分均达到或高于警戒基准线 (${threshold.toFixed(1)})，未发现低分商品。`;
+  }
+  if (lang === 'zh-Hant') {
+    return `在已查詢的 ${completedCount} 個平台中共掃描 ${totalScanned} 個商品，所有在售商品評分均達到或高於警戒基準線 (${threshold.toFixed(1)})，未發現低分商品。`;
+  }
+  return `Scanned ${totalScanned} item(s) across ${completedCount} queried platform(s); all items meet or exceed quality threshold (${threshold.toFixed(1)}★). No low-rated breaches detected.`;
+}
+
+/**
+ * Dynamic localized label for QA status badges.
+ */
+export function getStatusLabel(status: string, lang: Language): string {
+  const s = String(status || '').toUpperCase();
+  if (s === 'ALERT') {
+    if (lang === 'zh-CN') return '警戒 (ALERT)';
+    if (lang === 'zh-Hant') return '警戒 (ALERT)';
+    return 'ALERT';
+  }
+  if (s === 'OK' || s === 'PASS') {
+    if (lang === 'zh-CN') return '合格 (PASS)';
+    if (lang === 'zh-Hant') return '合格 (PASS)';
+    return 'PASS';
+  }
+  if (s.includes('MANUAL') || s.includes('CHECK') || s.includes('REVIEW')) {
+    if (lang === 'zh-CN') return '需人工核对';
+    if (lang === 'zh-Hant') return '需人工核對';
+    return 'MANUAL CHECK';
+  }
+  return status;
+}
+
+/**
+ * Dynamic localized label for defect category.
+ */
+export function getDefectCategoryLabel(issue: string, lang: Language): string {
+  const issueLower = String(issue || '').toLowerCase();
+  if (issueLower.includes('function')) {
+    if (lang === 'zh-CN') return '功能故障';
+    if (lang === 'zh-Hant') return '功能故障';
+    return 'Function issue';
+  }
+  if (issueLower.includes('damage') || issueLower.includes('broken')) {
+    if (lang === 'zh-CN') return '破损碎裂';
+    if (lang === 'zh-Hant') return '破損碎裂';
+    return 'Damage';
+  }
+  if (issueLower.includes('missing')) {
+    if (lang === 'zh-CN') return '缺少配件';
+    if (lang === 'zh-Hant') return '缺少配件';
+    return 'Missing parts';
+  }
+  if (issueLower.includes('safety') || issueLower.includes('smell') || issueLower.includes('toxic')) {
+    if (lang === 'zh-CN') return '安全隐患 / 异味';
+    if (lang === 'zh-Hant') return '安全隱患 / 異味';
+    return 'Safety concern';
+  }
+  if (issueLower.includes('packaging')) {
+    if (lang === 'zh-CN') return '包装破损';
+    if (lang === 'zh-Hant') return '包裝破損';
+    return 'Packaging damage';
+  }
+  if (issueLower.includes('assembly') || issueLower.includes('instruction')) {
+    if (lang === 'zh-CN') return '组装与说明困难';
+    if (lang === 'zh-Hant') return '組裝與說明困難';
+    return 'Assembly / Instruction';
+  }
+  if (issueLower.includes('mismatch') || issueLower.includes('appearance')) {
+    if (lang === 'zh-CN') return '实物与描述不符';
+    if (lang === 'zh-Hant') return '實物與描述不符';
+    return 'Appearance mismatch';
+  }
+  if (issueLower.includes('quality')) {
+    if (lang === 'zh-CN') return '做工材质欠佳';
+    if (lang === 'zh-Hant') return '做工材質欠佳';
+    return 'Quality';
+  }
+  return issue;
 }

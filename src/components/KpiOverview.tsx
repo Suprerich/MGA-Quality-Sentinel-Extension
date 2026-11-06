@@ -68,7 +68,11 @@ export const KpiOverview: React.FC<KpiOverviewProps> = ({
                 </span>
               </div>
               <span className="block mt-1 text-xs text-[#8E8E93] truncate">
-                {language === 'en' ? `Below alert threshold (${threshold.toFixed(1)})` : `全网低于警戒值 (${threshold.toFixed(1)}) 最低分`}
+                {language === 'en'
+                  ? `Below alert threshold (${threshold.toFixed(1)})`
+                  : language === 'zh-Hant'
+                  ? `全通路低於警戒值 (${threshold.toFixed(1)}) 最低分`
+                  : `全网低于警戒值 (${threshold.toFixed(1)}) 最低分`}
               </span>
             </>
           ) : (
@@ -77,7 +81,11 @@ export const KpiOverview: React.FC<KpiOverviewProps> = ({
                 {t.noLowRatedFound}
               </div>
               <span className="block mt-1 text-xs text-[#8E8E93]">
-                {language === 'en' ? `All items maintain ≥ ${threshold.toFixed(1)}★` : `已扫描商品评分均 ≥ ${threshold.toFixed(1)}★`}
+                {language === 'en'
+                  ? `All items maintain ≥ ${threshold.toFixed(1)}★`
+                  : language === 'zh-Hant'
+                  ? `已掃描商品評分均 ≥ ${threshold.toFixed(1)}★`
+                  : `已扫描商品评分均 ≥ ${threshold.toFixed(1)}★`}
               </span>
             </>
           )}
@@ -102,7 +110,7 @@ export const KpiOverview: React.FC<KpiOverviewProps> = ({
             {lowRatingCount}
           </span>
           <span className="block mt-1 text-xs text-[#8E8E93]">
-            {t.kpiBelowThreshold} {threshold.toFixed(1)} ({language === 'en' ? 'strictly lower' : '严格低于'})
+            {t.kpiBelowThreshold} {threshold.toFixed(1)} ({language === 'en' ? 'strictly lower' : language === 'zh-Hant' ? '嚴格低於' : '严格低于'})
           </span>
         </div>
       </div>

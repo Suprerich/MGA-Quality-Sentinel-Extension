@@ -11,21 +11,25 @@ import {
   User,
   Quote
 } from 'lucide-react';
-import { CrossPlatformGroup, DefectSeverity } from '../types';
+import { CrossPlatformGroup, DefectSeverity, Language } from '../types';
 import { PLAT_ORDER, PLAT_LABEL, belowPlatforms } from '../services/summaryService';
 import { getIssueSeverity } from '../services/taxonomy';
+import { getTranslation } from '../services/i18n';
 
 interface ProductDetailDrawerProps {
   group: CrossPlatformGroup | null;
   threshold: number;
   onClose: () => void;
+  language?: Language;
 }
 
 export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
   group,
   threshold,
-  onClose
+  onClose,
+  language = 'en'
 }) => {
+  const t = getTranslation(language);
   if (!group) return null;
 
   const breached = belowPlatforms(group, threshold);
@@ -44,16 +48,18 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
               {isAlert ? (
                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 px-2 py-0.5 rounded">
                   <AlertTriangle className="h-3 w-3" />
-                  <span>ALERT: Rating &lt; {threshold.toFixed(1)}</span>
+                  <span>
+                    {language === 'en' ? `ALERT: Rating < ${threshold.toFixed(1)}` : `预警：评分低于警戒值 ${threshold.toFixed(1)}`}
+                  </span>
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded">
                   <CheckCircle className="h-3 w-3" />
-                  <span>Compliant with Quality Target</span>
+                  <span>{language === 'en' ? 'Compliant with Quality Target' : '符合质量目标基准'}</span>
                 </span>
               )}
               {group._wl && (
-                <span className="text-[11px] text-neutral-400">· Watchlist Verified</span>
+                <span className="text-[11px] text-neutral-400">· {language === 'en' ? 'Watchlist Verified' : '关注库已认证'}</span>
               )}
             </div>
             <h2 className="text-base font-semibold text-neutral-900 dark:text-white leading-snug">
@@ -79,7 +85,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
           {/* Platform Performance Cards */}
           <div>
             <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-2.5">
-              Retail Channel Ratings
+              {language === 'en' ? 'Retail Channel Ratings' : '各渠道零售评级'}
             </h3>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
@@ -104,7 +110,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                           target="_blank"
                           rel="noreferrer"
                           className="text-neutral-400 hover:text-neutral-900 dark:hover:text-white"
-                          title="Open product page"
+                          title={language === 'en' ? 'Open product page' : '打开商品页面'}
                         >
                           <ExternalLink className="h-3 w-3" />
                         </a>
@@ -123,11 +129,15 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                           {sc.rating.toFixed(1)}
                         </div>
                         <div className="text-[10px] text-neutral-400 mt-0.5">
-                          {sc.count !== null ? `${sc.count.toLocaleString()} reviews` : 'Reviews captured'}
+                          {sc.count !== null
+                            ? `${sc.count.toLocaleString()} ${language === 'en' ? 'reviews' : '条评论'}`
+                            : (language === 'en' ? 'Reviews captured' : '评论已抓取')}
                         </div>
                       </div>
                     ) : (
-                      <div className="text-neutral-400 text-xs py-1">Not Listed</div>
+                      <div className="text-neutral-400 text-xs py-1">
+                        {t.statusNotScanned || (language === 'en' ? 'Not Listed' : '未查询')}
+                      </div>
                     )}
                   </div>
                 );
@@ -139,13 +149,17 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
           <div>
             <div className="flex items-center justify-between mb-2.5">
               <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-                Captured Reviews &amp; Defect Classifications ({group.complaints.length})
+                {language === 'en'
+                  ? `Captured Reviews & Defect Classifications (${group.complaints.length})`
+                  : `已抓取评论与缺陷分类归纳 (${group.complaints.length})`}
               </h3>
             </div>
 
             {group.complaints.length === 0 ? (
               <div className="p-8 text-center rounded-lg border border-neutral-100 bg-neutral-50 text-xs text-neutral-500 dark:border-neutral-800 dark:bg-neutral-800/30 dark:text-neutral-400">
-                No individual review quotes captured yet. Run Deep Analyze on this item to extract verbatim consumer comments.
+                {language === 'en'
+                  ? 'No individual review quotes captured yet. Run Deep Analyze on this item to extract verbatim consumer comments.'
+                  : '尚未抓取到具体评论摘录。可对该商品运行“深度分析”以提取真实顾客评价原话。'}
               </div>
             ) : (
               <div className="space-y-3">
@@ -207,9 +221,9 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
           </span>
           <button
             onClick={onClose}
-            className="px-3.5 py-1.5 text-xs font-medium text-neutral-700 bg-white hover:bg-neutral-100 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 rounded border border-neutral-200 dark:border-neutral-700"
+            className="px-3.5 py-1.5 text-xs font-medium text-neutral-700 bg-white hover:bg-neutral-100 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700 rounded border border-neutral-200 dark:border-neutral-700 cursor-pointer"
           >
-            Close Drawer
+            {language === 'en' ? 'Close Drawer' : '关闭抽屉'}
           </button>
         </div>
       </div>
